@@ -1,0 +1,5 @@
+name: BattleShips
+version: '${project.version}'
+main: me.sk8ingduck.battleships.BattleShips
+api-version: 1.19
+authors: [ sk8ingDuck ]
