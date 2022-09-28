@@ -24,7 +24,7 @@ public final class BattleShips extends JavaPlugin {
         PluginManager pluginManager = Bukkit.getPluginManager();
         try {
             for (ClassPath.ClassInfo classInfo : ClassPath.from(getClassLoader())
-                    .getTopLevelClasses("com.sk8ingduck.ttt.listener")) {
+                    .getTopLevelClasses("com.sk8ingduck.battleships.listener")) {
                 Class listener = Class.forName(classInfo.getName());
 
                 if (Listener.class.isAssignableFrom(listener)) {
