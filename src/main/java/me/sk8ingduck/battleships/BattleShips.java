@@ -1,12 +1,15 @@
 package me.sk8ingduck.battleships;
 
 import com.google.common.reflect.ClassPath;
+import me.sk8ingduck.battleships.command.SetspawnCommand;
+import me.sk8ingduck.battleships.config.DBConfig;
+import me.sk8ingduck.battleships.config.SettingsConfig;
+import me.sk8ingduck.battleships.config.TeamConfig;
 import me.sk8ingduck.battleships.game.GameSession;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
-
 import java.io.IOException;
 
 public final class BattleShips extends JavaPlugin {
@@ -15,11 +18,19 @@ public final class BattleShips extends JavaPlugin {
 
     private GameSession game;
 
+    private DBConfig dbConfig;
+
+    private TeamConfig teamConfig;
+    private SettingsConfig settingsConfig;
     @Override
     public void onEnable() {
         instance = this;
-        game = new GameSession();
 
+        dbConfig = new DBConfig("database.yml", getDataFolder());
+        teamConfig = new TeamConfig("teams.yml", getDataFolder());
+        settingsConfig = new SettingsConfig("settings.yml", getDataFolder());
+
+        game = new GameSession();
 
         PluginManager pluginManager = Bukkit.getPluginManager();
         try {
@@ -35,6 +46,7 @@ public final class BattleShips extends JavaPlugin {
             e.printStackTrace();
         }
 
+        this.getCommand("setspawn").setExecutor(new SetspawnCommand());
 
     }
 
@@ -51,5 +63,11 @@ public final class BattleShips extends JavaPlugin {
         return game;
     }
 
+    public DBConfig getDbConfig() {
+        return dbConfig;
+    }
 
+    public TeamConfig getTeamConfig() {
+        return teamConfig;
+    }
 }

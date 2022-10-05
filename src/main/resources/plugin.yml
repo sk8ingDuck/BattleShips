@@ -3,3 +3,10 @@ version: '${project.version}'
 main: me.sk8ingduck.battleships.BattleShips
 api-version: 1.19
 authors: [ sk8ingDuck ]
+
+
+commands:
+  setspawn:
+    description: Setspawn command
+    usage: /<command>
+    permission: battleships.admin
