@@ -1,5 +1,6 @@
 package me.sk8ingduck.battleships.command;
 
+import me.sk8ingduck.battleships.BattleShips;
 import me.sk8ingduck.battleships.game.Team;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -24,7 +25,7 @@ public class SetspawnCommand implements CommandExecutor {
         String teamName = args[0];
 
         Team team = Team.valueOf(teamName.toUpperCase());
-        team.setSpawnLocation(player.getLocation());
+        BattleShips.getInstance().getTeamConfig().setSpawnLocation(team, player.getLocation());
         sender.sendMessage("Spawn Location von Team " + team + " gesetzt.");
         return true;
     }

@@ -10,12 +10,12 @@ public class Countdown implements Runnable {
 
     private boolean isRunning;
 
-    private final AtomicInteger countdown;
+    private final AtomicInteger seconds;
 
     private BukkitTask bukkitTask;
 
     public Countdown(int seconds) {
-        countdown = new AtomicInteger(seconds + 1);
+        this.seconds = new AtomicInteger(seconds + 1);
     }
 
     public void run() {}
@@ -31,7 +31,7 @@ public class Countdown implements Runnable {
         isRunning = false;
     }
 
-    public AtomicInteger getCountdown() {
-        return countdown;
+    public AtomicInteger getSeconds() {
+        return seconds;
     }
 }

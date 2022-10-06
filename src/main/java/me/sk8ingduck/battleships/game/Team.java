@@ -9,26 +9,26 @@ import java.util.ArrayList;
 
 public enum Team {
 
-    RED,
-    GREEN,
-    BLUE,
-    YELLOW,
-    WHITE,
-    ORANGE,
-    PURPLE,
-    GRAY;
+    RED("Rot", "&c", null),
+    GREEN("Grün", "&a", null),
+    BLUE("Blau", "&9", null),
+    YELLOW("Gelb", "&e", null),
+    WHITE("Weiss", "&f", null),
+    ORANGE("Orange", "&6", null),
+    PURPLE("Lila", "&d", null),
+    GRAY("Grau", "&8", null);
 
-    private String name;
-    private String color;
-    private Location spawnLocation;
+    private final String name;
+    private final String color;
+    private final Location spawnLocation;
     private ArrayList<Player> members;
 
     private final TeamConfig teamConfig = BattleShips.getInstance().getTeamConfig();
 
-    Team() {
-        this.name = teamConfig.getName(this);
-        this.color = teamConfig.getColor(this);
-        this.spawnLocation = teamConfig.getSpawnLocation(this);
+    Team(String defaultName, String defaultColor, Location defaultLocation) {
+        this.name = (String) teamConfig.checkPathOrSet("team." + name() + ".name", defaultName);
+        this.color = (String) teamConfig.checkPathOrSet("team." + name() + ".color", defaultColor);
+        this.spawnLocation = (Location) teamConfig.checkPathOrSet("team." + name() + ".spawnLocation", defaultLocation);
 
         this.members = new ArrayList<>();
     }

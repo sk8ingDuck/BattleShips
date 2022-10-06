@@ -55,4 +55,14 @@ public class Config {
             throw new RuntimeException(e);
         }
     }
+
+    public Object checkPathOrSet(String path, Object defaultValue) {
+        if (fileConfiguration.get(path) == null) {
+            fileConfiguration.set(path, defaultValue);
+            save();
+            return defaultValue;
+        }
+
+        return fileConfiguration.get(path);
+    }
 }

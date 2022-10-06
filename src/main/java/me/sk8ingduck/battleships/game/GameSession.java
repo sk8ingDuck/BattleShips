@@ -23,8 +23,20 @@ public class GameSession {
     }
 
     public void changeGameState(GameState gameState) {
-        Bukkit.getPluginManager().callEvent(new GameStateChangeEvent(currentGameState, gameState));
+        if (currentCountdown != null)
+            currentCountdown.stop();
 
+        Bukkit.getPluginManager().callEvent(new GameStateChangeEvent(currentGameState, gameState));
         currentGameState = gameState;
+
+        if (gameState == null) return;
+
+        currentCountdown = gameState.getCountdown();
+        currentCountdown.start();
     }
+
+    public GameState getCurrentGameState() {
+        return currentGameState;
+    }
+
 }

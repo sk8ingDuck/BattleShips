@@ -7,18 +7,18 @@ import me.sk8ingduck.battleships.game.GameState;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
-public class PlayerJoinListener implements Listener {
+public class PlayerQuitListener implements Listener {
 
     @EventHandler
-    public void onJoin(PlayerJoinEvent event) {
+    public void onPlayerQuit(PlayerQuitEvent event) {
         GameSession game = BattleShips.getInstance().getGame();
         SettingsConfig config = BattleShips.getInstance().getSettingsConfig();
-        if (game.getCurrentGameState() == null
-                && Bukkit.getOnlinePlayers().size() >= config.getNeededPlayersToStart()) {
-            game.changeGameState(GameState.LOBBY);
-        }
 
+        if (game.getCurrentGameState() == GameState.LOBBY
+                && Bukkit.getOnlinePlayers().size() <= config.getNeededPlayersToStart()) {
+            game.changeGameState(null);
+        }
     }
 }

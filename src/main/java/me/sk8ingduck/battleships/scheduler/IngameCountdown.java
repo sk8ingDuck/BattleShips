@@ -12,13 +12,13 @@ public class IngameCountdown extends Countdown {
 
     @Override
     public void run() {
-        int counter = getCountdown().decrementAndGet();
+        int seconds = getSeconds().decrementAndGet();
 
-        if (counter > 0) {
-            Bukkit.getOnlinePlayers().forEach((Player p) -> p.setLevel(counter));
-        } else {
+        if (seconds == 0) {
             BattleShips.getInstance().getGame().nextGameState();
-            stop();
+            return;
         }
+
+        Bukkit.getOnlinePlayers().forEach((Player p) -> p.setLevel(seconds));
     }
 }

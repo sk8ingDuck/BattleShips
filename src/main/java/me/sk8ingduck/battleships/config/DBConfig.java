@@ -4,29 +4,20 @@ import java.io.File;
 
 public class DBConfig extends Config {
 
-    private String host;
-    private int port;
-    private String username;
-    private String password;
-    private String database;
+    private final String host;
+    private final int port;
+    private final String username;
+    private final String password;
+    private final String database;
 
     public DBConfig(String name, File path) {
         super(name, path);
 
-        if (getFileConfiguration().get("mysql.host") == null) {
-            getFileConfiguration().set("mysql.host", "localhost");
-            getFileConfiguration().set("mysql.port", 3306);
-            getFileConfiguration().set("mysql.username", "username");
-            getFileConfiguration().set("mysql.password", "password");
-            getFileConfiguration().set("mysql.database", "database");
-            save();
-        }
-
-        this.host = getFileConfiguration().getString("mysql.host");
-        this.port = getFileConfiguration().getInt("mysql.port");
-        this.username = getFileConfiguration().getString("mysql.username");
-        this.password = getFileConfiguration().getString("mysql.password");
-        this.database = getFileConfiguration().getString("mysql.database");
+        this.host = (String) checkPathOrSet("mysql.host", "localhost");
+        this.port = (int) checkPathOrSet("mysql.port", 3306);
+        this.username = (String) checkPathOrSet("mysql.username", "root");
+        this.password = (String) checkPathOrSet("mysql.password", "pw");
+        this.database = (String) checkPathOrSet("mysql.database", "db");
     }
 
     public String getHost() {

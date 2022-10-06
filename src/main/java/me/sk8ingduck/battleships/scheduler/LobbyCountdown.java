@@ -13,16 +13,16 @@ public class LobbyCountdown extends Countdown {
 
     @Override
     public void run() {
-        int counter = getCountdown().decrementAndGet();
+        int seconds = getSeconds().decrementAndGet();
 
-        if (counter > 0) {
-            Bukkit.getOnlinePlayers().forEach((Player p) -> p.setLevel(counter));
-            if (counter % 5 == 0 || counter <= 3) {
-                Bukkit.broadcastMessage("§aDas Spiel startet in §6" + counter + " Sekunden");
-            }
-        } else {
+        if (seconds == 0) {
             BattleShips.getInstance().getGame().nextGameState();
-            stop();
+            return;
+        }
+
+        Bukkit.getOnlinePlayers().forEach((Player p) -> p.setLevel(seconds));
+        if (seconds % 5 == 0 || seconds <= 3) {
+            Bukkit.broadcastMessage("§aDas Spiel startet in §6" + seconds + " Sekunden");
         }
     }
 

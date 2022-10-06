@@ -8,7 +8,7 @@ public class MySQL {
 
     private Connection con;
 
-    public MySQL(String host, String port, String username, String password, String database) {
+    public MySQL(String host, int port, String username, String password, String database) {
         try {
             con = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/",
                     username, password);
