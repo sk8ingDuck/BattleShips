@@ -4,6 +4,6 @@ TODO:
 - Core ✓
 - Spielphasen ✓ 
 - TeamManager ✓
+- Config ✓
 - Spiellogik ✗
-- Config ✗
 - Datenbank ✗
