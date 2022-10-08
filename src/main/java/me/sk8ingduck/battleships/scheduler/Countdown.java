@@ -10,13 +10,10 @@ public class Countdown implements Runnable {
 
     private boolean isRunning;
 
-    private final AtomicInteger seconds;
+    private int seconds;
+    private AtomicInteger currentSeconds;
 
     private BukkitTask bukkitTask;
-
-    public Countdown(int seconds) {
-        this.seconds = new AtomicInteger(seconds + 1);
-    }
 
     public void run() {}
 
@@ -29,9 +26,18 @@ public class Countdown implements Runnable {
     public void stop() {
         bukkitTask.cancel();
         isRunning = false;
+
     }
 
+    public void resetCountdown() {
+        this.currentSeconds = new AtomicInteger(seconds + 1);
+    }
+
+    public void setSeconds(int seconds) {
+        this.seconds = seconds;
+        this.currentSeconds = new AtomicInteger(seconds + 1);
+    }
     public AtomicInteger getSeconds() {
-        return seconds;
+        return currentSeconds;
     }
 }

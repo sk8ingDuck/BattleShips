@@ -18,6 +18,7 @@ public class PlayerQuitListener implements Listener {
 
         if (game.getCurrentGameState() == GameState.LOBBY
                 && Bukkit.getOnlinePlayers().size() <= config.getNeededPlayersToStart()) {
+            GameState.LOBBY.getCountdown().resetCountdown();
             game.changeGameState(null);
         }
     }

@@ -6,6 +6,8 @@ import me.sk8ingduck.battleships.config.DBConfig;
 import me.sk8ingduck.battleships.config.SettingsConfig;
 import me.sk8ingduck.battleships.config.TeamConfig;
 import me.sk8ingduck.battleships.game.GameSession;
+import me.sk8ingduck.battleships.game.Team;
+import me.sk8ingduck.battleships.game.TeamManager;
 import me.sk8ingduck.battleships.mysql.MySQL;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
@@ -19,6 +21,7 @@ public final class BattleShips extends JavaPlugin {
 
     private GameSession game;
 
+    private TeamManager teamManager;
     private TeamConfig teamConfig;
     private SettingsConfig settingsConfig;
 
@@ -44,6 +47,7 @@ public final class BattleShips extends JavaPlugin {
 
         this.getCommand("setspawn").setExecutor(new SetspawnCommand());
 
+        teamManager = new TeamManager();
 
         DBConfig dbConfig = new DBConfig("database.yml", getDataFolder());
         teamConfig = new TeamConfig("teams.yml", getDataFolder());
@@ -64,6 +68,10 @@ public final class BattleShips extends JavaPlugin {
 
     public GameSession getGame() {
         return game;
+    }
+
+    public TeamManager getTeamManager() {
+        return teamManager;
     }
 
     public TeamConfig getTeamConfig() {

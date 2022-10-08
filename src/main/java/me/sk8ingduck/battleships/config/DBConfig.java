@@ -13,11 +13,11 @@ public class DBConfig extends Config {
     public DBConfig(String name, File path) {
         super(name, path);
 
-        this.host = (String) checkPathOrSet("mysql.host", "localhost");
-        this.port = (int) checkPathOrSet("mysql.port", 3306);
-        this.username = (String) checkPathOrSet("mysql.username", "root");
-        this.password = (String) checkPathOrSet("mysql.password", "pw");
-        this.database = (String) checkPathOrSet("mysql.database", "db");
+        this.host = (String) getPathOrSet("mysql.host", "localhost");
+        this.port = (int) getPathOrSet("mysql.port", 3306);
+        this.username = (String) getPathOrSet("mysql.username", "root");
+        this.password = (String) getPathOrSet("mysql.password", "pw");
+        this.database = (String) getPathOrSet("mysql.database", "db");
     }
 
     public String getHost() {

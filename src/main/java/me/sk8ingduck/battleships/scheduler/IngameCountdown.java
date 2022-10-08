@@ -6,8 +6,8 @@ import org.bukkit.entity.Player;
 
 public class IngameCountdown extends Countdown {
 
-    public IngameCountdown(int seconds) {
-        super(seconds);
+    public IngameCountdown() {
+        super();
     }
 
     @Override

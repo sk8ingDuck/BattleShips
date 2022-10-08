@@ -56,13 +56,15 @@ public class Config {
         }
     }
 
-    public Object checkPathOrSet(String path, Object defaultValue) {
+    public Object getPathOrSet(String path, Object defaultValue) {
         if (fileConfiguration.get(path) == null) {
             fileConfiguration.set(path, defaultValue);
             save();
-            return defaultValue;
+            return defaultValue instanceof String ? ((String) defaultValue).replaceAll("&", "§") : defaultValue;
         }
 
-        return fileConfiguration.get(path);
+        Object value = fileConfiguration.get(path);
+
+        return value instanceof String ? ((String) value).replaceAll("&", "§") : value;
     }
 }

@@ -7,8 +7,8 @@ import org.bukkit.entity.Player;
 public class WarmupCountdown extends Countdown {
 
 
-    public WarmupCountdown(int seconds) {
-        super(seconds);
+    public WarmupCountdown() {
+        super();
     }
 
     @Override

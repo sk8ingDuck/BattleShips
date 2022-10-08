@@ -5,6 +5,7 @@ import me.sk8ingduck.battleships.config.SettingsConfig;
 import me.sk8ingduck.battleships.game.GameSession;
 import me.sk8ingduck.battleships.game.GameState;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -18,6 +19,13 @@ public class PlayerJoinListener implements Listener {
         if (game.getCurrentGameState() == null
                 && Bukkit.getOnlinePlayers().size() >= config.getNeededPlayersToStart()) {
             game.changeGameState(GameState.LOBBY);
+        }
+
+        Player player = event.getPlayer();
+
+        if (game.getCurrentGameState() == null || game.getCurrentGameState() == GameState.LOBBY) {
+
+            player.getInventory().setItem(4, config.getTeamChooserItem());
         }
 
     }

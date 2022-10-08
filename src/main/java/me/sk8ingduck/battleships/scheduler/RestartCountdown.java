@@ -6,8 +6,8 @@ import org.bukkit.entity.Player;
 public class RestartCountdown extends Countdown {
 
 
-    public RestartCountdown(int seconds) {
-        super(seconds);
+    public RestartCountdown() {
+        super();
     }
 
     @Override

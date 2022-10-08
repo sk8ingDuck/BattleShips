@@ -16,5 +16,4 @@ public class TeamConfig extends Config {
         team.setSpawnLocation(location);
         save();
     }
-
 }

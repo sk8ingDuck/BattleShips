@@ -7,8 +7,8 @@ import org.bukkit.entity.Player;
 public class LobbyCountdown extends Countdown {
 
 
-    public LobbyCountdown(int seconds) {
-        super(seconds);
+    public LobbyCountdown() {
+        super();
     }
 
     @Override
