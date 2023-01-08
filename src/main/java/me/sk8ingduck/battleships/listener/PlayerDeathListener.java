@@ -4,16 +4,22 @@ import me.sk8ingduck.battleships.BattleShips;
 import me.sk8ingduck.battleships.game.GameSession;
 import me.sk8ingduck.battleships.game.Team;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 
+import java.util.stream.Collectors;
+
 public class PlayerDeathListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerDeath(PlayerDeathEvent event) {
+        event.getDrops().stream().filter(item -> !item.getType().equals(Material.EMERALD))
+                .collect(Collectors.toList()).clear();
+
         Player player = event.getEntity();
         Team playerTeam = BattleShips.getInstance().getGame().getTeam(player);
         if (playerTeam == null) return;
