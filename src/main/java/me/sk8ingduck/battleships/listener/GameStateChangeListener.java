@@ -33,7 +33,8 @@ public class GameStateChangeListener implements Listener {
         }
 
         if (event.getPreviousGameState() == GameState.INGAME && event.getNewGameState() == GameState.RESTARTING) {
-
+            Bukkit.getOnlinePlayers().forEach(player ->
+                    player.teleport(BattleShips.getInstance().getSettingsConfig().getLobbySpawn()));
         }
     }
 }

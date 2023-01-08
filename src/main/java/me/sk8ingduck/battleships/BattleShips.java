@@ -72,9 +72,8 @@ public final class BattleShips extends JavaPlugin {
         });
 
         pluginManager.registerEvents(new MenuFunctionListener(), this);
-        for (Team team : Team.getActiveTeams()) {
 
-        }
+        Team.getActiveTeams(); //load teams
     }
 
     @Override

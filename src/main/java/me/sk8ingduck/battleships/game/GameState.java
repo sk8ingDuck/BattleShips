@@ -2,24 +2,108 @@ package me.sk8ingduck.battleships.game;
 
 
 import me.sk8ingduck.battleships.BattleShips;
-import me.sk8ingduck.battleships.scheduler.*;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitTask;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 public enum GameState {
 
-    LOBBY(new LobbyCountdown(), 15),
-    WARMUP(new WarmupCountdown(), 30),
-    INGAME(new IngameCountdown(), 20),
-    RESTARTING(new RestartCountdown(), 10);
+    LOBBY( 15) {
+        @Override
+        public void execute() {
+            int seconds = getSeconds().decrementAndGet();
 
-    private final Countdown countdown;
-    GameState(Countdown countdown, int defaultSeconds) {
-        this.countdown = countdown;
+            if (seconds == 0) {
+                BattleShips.getInstance().getGame().nextGameState();
+                return;
+            }
+
+            Bukkit.getOnlinePlayers().forEach((Player p) -> p.setLevel(seconds));
+            if (seconds % 5 == 0 || seconds <= 3) {
+                Bukkit.broadcastMessage("§aDas Spiel startet in §6" + seconds + " Sekunden");
+            }
+        }
+    },
+    WARMUP(30) {
+        @Override
+        public void execute() {
+            int seconds = getSeconds().decrementAndGet();
+
+            if (seconds == 0) {
+                BattleShips.getInstance().getGame().nextGameState();
+                return;
+            }
+
+            Bukkit.getOnlinePlayers().forEach((Player p) -> p.setLevel(seconds));
+            if (seconds % 5 == 0 || seconds <= 3) {
+                Bukkit.broadcastMessage("§aDie Runde beginnt in §6" + seconds + " Sekunden");
+            }
+        }
+    },
+    INGAME(20) {
+        @Override
+        public void execute() {
+            int seconds = getSeconds().decrementAndGet();
+
+            if (seconds == 0) {
+                BattleShips.getInstance().getGame().nextGameState();
+                return;
+            }
+
+            Bukkit.getOnlinePlayers().forEach((Player p) -> p.setLevel(seconds));
+        }
+    },
+    RESTARTING(10) {
+        @Override
+        public void execute() {
+            int seconds = getSeconds().decrementAndGet();
+
+            if (seconds == 0) {
+                Bukkit.getServer().spigot().restart();
+                return;
+            }
+
+            Bukkit.getOnlinePlayers().forEach((Player p) -> p.setLevel(seconds));
+
+            if (seconds < 10)
+                Bukkit.broadcastMessage("§cDer Server wird in §6" + seconds + " Sekunde(n) §cneugestartet");
+        }
+    };
+
+
+    private int seconds;
+    private AtomicInteger currentSeconds;
+
+    private BukkitTask bukkitTask;
+
+    GameState(int defaultSeconds) {
         int seconds = (int) BattleShips.getInstance()
                 .getSettingsConfig().getPathOrSet("countdown." + name(), defaultSeconds);
-        countdown.setSeconds(seconds);
+        setSeconds(seconds);
     }
 
-    public Countdown getCountdown() {
-        return countdown;
+
+    public abstract void execute();
+
+    public void start() {
+        bukkitTask = Bukkit.getScheduler().runTaskTimer(BattleShips.getInstance(), this::execute, 0, 20);
+    }
+
+    public void stop() {
+        bukkitTask.cancel();
+    }
+
+    public void resetCountdown() {
+        this.currentSeconds = new AtomicInteger(seconds + 1);
+    }
+
+    public void setSeconds(int seconds) {
+        this.seconds = seconds;
+        this.currentSeconds = new AtomicInteger(seconds + 1);
+    }
+    public AtomicInteger getSeconds() {
+        return currentSeconds;
     }
 }

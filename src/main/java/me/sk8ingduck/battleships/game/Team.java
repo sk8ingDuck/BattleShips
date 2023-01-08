@@ -22,7 +22,6 @@ public enum Team {
     PURPLE("Lila", "LIGHT_PURPLE", new ItemStack(Material.PURPLE_BANNER), new ItemStack(Material.PURPLE_WOOL)),
     GRAY("Grau", "GRAY", new ItemStack(Material.GRAY_BANNER), new ItemStack(Material.GRAY_WOOL)),
     WHITE("Weiss", "WHITE", new ItemStack(Material.WHITE_BANNER), new ItemStack(Material.WHITE_WOOL));
-
     private org.bukkit.scoreboard.Team scoreboardTeam;
     private final String name;
     private final ChatColor color;

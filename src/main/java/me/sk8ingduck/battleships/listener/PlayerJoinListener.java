@@ -18,29 +18,38 @@ public class PlayerJoinListener implements Listener {
     public void onJoin(PlayerJoinEvent event) {
         GameSession game = BattleShips.getInstance().getGame();
         SettingsConfig config = BattleShips.getInstance().getSettingsConfig();
+        Player player = event.getPlayer();
+        player.setScoreboard(BattleShips.getInstance().getScoreboard());
+
+        if (game.getCurrentGameState() != null && game.getCurrentGameState() != GameState.LOBBY) {
+            player.kickPlayer("§cDas Spiel hat bereits angefangen.");
+            event.setJoinMessage(null);
+            return;
+        }
+
+        if (Bukkit.getOnlinePlayers().size() > config.getTeamSize() * config.getTeamCount()) {
+            player.kickPlayer("§cServer ist bereits voll");
+            return;
+        }
+
         if (game.getCurrentGameState() == null
                 && Bukkit.getOnlinePlayers().size() >= config.getNeededPlayersToStart()) {
             game.changeGameState(GameState.LOBBY);
         }
 
-        Player player = event.getPlayer();
-        player.setScoreboard(BattleShips.getInstance().getScoreboard());
+        player.getInventory().clear();
+        player.setGameMode(GameMode.SURVIVAL);
+        player.setHealth(20);
+        player.setFoodLevel(20);
+        player.setLevel(0);
+        player.setExp(0);
+        player.getActivePotionEffects().forEach(effect -> player.removePotionEffect(effect.getType()));
+        player.getInventory().setItem(4, config.getTeamChooserItem());
 
-        if (game.getCurrentGameState() == null || game.getCurrentGameState() == GameState.LOBBY) {
-            player.getInventory().clear();
-            player.setGameMode(GameMode.SURVIVAL);
-            player.setHealth(20);
-            player.setFoodLevel(20);
-            player.setLevel(0);
-            player.setExp(0);
-            player.getActivePotionEffects().forEach(effect -> player.removePotionEffect(effect.getType()));
-            player.getInventory().setItem(4, config.getTeamChooserItem());
+        if (config.getLobbySpawn() != null)
+            player.teleport(config.getLobbySpawn());
 
-            if (config.getLobbySpawn() == null) Bukkit.broadcastMessage("NO LOBBY SPAWN SET!");
-            else player.teleport(config.getLobbySpawn());
-
-            event.setJoinMessage("§a" + player.getName() + " §ehat das Spiel betreten.");
-        }
+        event.setJoinMessage("§a" + player.getName() + " §ehat das Spiel betreten.");
 
     }
 }

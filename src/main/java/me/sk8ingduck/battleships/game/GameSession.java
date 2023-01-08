@@ -2,7 +2,6 @@ package me.sk8ingduck.battleships.game;
 
 import me.sk8ingduck.battleships.BattleShips;
 import me.sk8ingduck.battleships.event.GameStateChangeEvent;
-import me.sk8ingduck.battleships.scheduler.Countdown;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -18,7 +17,7 @@ public class GameSession {
 
     private GameState currentGameState;
 
-    private Countdown currentCountdown;
+    private GameState currentCountdown;
 
     public GameSession() {
         this.playerTeam = new HashMap<>();
@@ -45,7 +44,7 @@ public class GameSession {
 
         if (gameState == null) return;
 
-        currentCountdown = gameState.getCountdown();
+        currentCountdown = gameState;
         currentCountdown.start();
     }
 
@@ -82,7 +81,7 @@ public class GameSession {
             if (team.getSize() == BattleShips.getInstance().getSettingsConfig().getTeamSize())
                 continue; //team is full
 
-            if (team.getSize() != 0 && team.getSize() < leastPopulatedSize) {
+            if (team.getSize() != 0 && team.getSize() < leastPopulatedSize) { //team is not empty and has least members
                 leastPopulatedSize = team.getSize();
                 leastPopulated = team;
             }

@@ -21,7 +21,7 @@ public class SetspawnCommand implements CommandExecutor {
             sender.sendMessage("Mögliche Befehle:");
             sender.sendMessage("/setspawn <Team>");
             sender.sendMessage("/setspawn <Team> <banner | bannerChest>");
-            sender.sendMessage("/setspawn <lobby | spectatorspawn | shop> ");
+            sender.sendMessage("/setspawn <lobby | spectatorspawn | shop>");
             return true;
         }
 
@@ -46,8 +46,6 @@ public class SetspawnCommand implements CommandExecutor {
         }
 
         if (args[0].equalsIgnoreCase("shop")) {
-            BattleShips.getInstance().getSettingsConfig().addVillagerSpawn(player.getLocation());
-            sender.sendMessage("Villagershop gesetzt.");
             Villager v = (Villager) player.getWorld().spawnEntity(player.getLocation(), EntityType.VILLAGER);
             v.setCustomName("Shop");
             v.setAI(false);
@@ -57,15 +55,6 @@ public class SetspawnCommand implements CommandExecutor {
             return true;
         }
 
-        if (args[0].equalsIgnoreCase("removevillager")) {
-            boolean removed = BattleShips.getInstance().getSettingsConfig().removeVillagerSpawn(player.getLocation());
-            if (removed) {
-                sender.sendMessage("Villager-Spawnpunkt entfernt");
-            } else {
-                sender.sendMessage("An deiner Position befindet sich kein Villager-Spawnpunkt.");
-            }
-            return true;
-        }
 
         String teamName = args[0];
         Team team = Team.valueOf(teamName.toUpperCase());

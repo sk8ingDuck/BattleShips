@@ -21,18 +21,19 @@ public class PlayerQuitListener implements Listener {
         if (game.getCurrentGameState() != null
                 && game.getCurrentGameState() == GameState.LOBBY
                 && Bukkit.getOnlinePlayers().size() <= config.getNeededPlayersToStart()) {
-            GameState.LOBBY.getCountdown().resetCountdown();
+            GameState.LOBBY.resetCountdown();
             game.changeGameState(null);
         }
 
         Player player = event.getPlayer();
+        Team playerTeam = game.getTeam(player);
 
         if (game.getCurrentGameState() == null || game.getCurrentGameState() == GameState.LOBBY) {
             event.setQuitMessage("§c" + player.getName() + " §ehat das Spiel verlassen.");
-            Team playerTeam = game.getTeam(player);
             if (playerTeam != null) {
                 playerTeam.removeMember(player);
             }
+            return;
         }
 
         Team stolenBannerTeam = game.getBanner(player);
