@@ -28,12 +28,12 @@ public class FoodGui extends Gui {
         Slot beef = gui.getSlot(16);
 
         bread.setItem(new ItemBuilder(Material.BREAD, 4).setLores("", "§6Kosten§7: §a2 Emeralds").build());
-        fish.setItem(new ItemBuilder(Material.LEGACY_COOKED_FISH, 4).setLores("", "§6Kosten§7: §a3 Emeralds").build());
+        fish.setItem(new ItemBuilder(Material.COOKED_COD, 4).setLores("", "§6Kosten§7: §a3 Emeralds").build());
         pork.setItem(new ItemBuilder(Material.COOKED_PORKCHOP, 2).setLores("", "§6Kosten§7: §a4 Emeralds").build());
         beef.setItem(new ItemBuilder(Material.COOKED_BEEF).setLores("", "§6Kosten§7: §a5 Emeralds").build());
 
         bread.setClickHandler((player, clickInformation) -> buy(player, new ItemStack(Material.BREAD, 4), 2));
-        fish.setClickHandler((player, clickInformation) -> buy(player, new ItemStack(Material.LEGACY_COOKED_FISH, 4), 3));
+        fish.setClickHandler((player, clickInformation) -> buy(player, new ItemStack(Material.COOKED_COD, 4), 3));
         pork.setClickHandler((player, clickInformation) -> buy(player, new ItemStack(Material.COOKED_PORKCHOP, 2), 4));
         beef.setClickHandler((player, clickInformation) -> buy(player, new ItemStack(Material.COOKED_BEEF, 1), 5));
 

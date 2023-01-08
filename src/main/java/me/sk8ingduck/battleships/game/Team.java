@@ -50,9 +50,9 @@ public enum Team {
         capturedBanners = new ArrayList<>();
         capturedBanners.add(this);
 
-        scoreboardTeam = BattleShips.getInstance().getScoreboard().getTeam(name());
+        scoreboardTeam = BattleShips.getInstance().getScoreboard().getTeam("z"+name());
         if (scoreboardTeam == null)
-            scoreboardTeam = BattleShips.getInstance().getScoreboard().registerNewTeam(name());
+            scoreboardTeam = BattleShips.getInstance().getScoreboard().registerNewTeam("z"+name());
 
         scoreboardTeam.setColor(color);
         resetBanner();
