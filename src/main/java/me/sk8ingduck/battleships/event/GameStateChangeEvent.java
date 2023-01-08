@@ -3,7 +3,6 @@ package me.sk8ingduck.battleships.event;
 import me.sk8ingduck.battleships.game.GameState;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
-import org.jetbrains.annotations.NotNull;
 
 public class GameStateChangeEvent extends Event {
 
@@ -28,7 +27,7 @@ public class GameStateChangeEvent extends Event {
     }
 
     @Override
-    public @NotNull HandlerList getHandlers() {
+    public HandlerList getHandlers() {
         return handlerList;
     }
 

@@ -5,28 +5,75 @@ import me.sk8ingduck.battleships.game.Team;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
+import org.bukkit.entity.Villager;
 
 public class SetspawnCommand implements CommandExecutor {
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-        if (!(sender instanceof Player)) {
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (!(sender instanceof Player player)) {
             sender.sendMessage("Not a player.");
             return true;
         }
-        if (args.length != 1) {
-            sender.sendMessage("Syntax: /setspawn <Team>");
+        if (args.length != 1 && args.length != 2) {
+            sender.sendMessage("Mögliche Befehle:");
+            sender.sendMessage("/setspawn <Team>");
+            sender.sendMessage("/setspawn <Team> <banner | bannerChest>");
+            sender.sendMessage("/setspawn <lobby | spectatorspawn | shop> ");
             return true;
         }
 
-        Player player = (Player) sender;
-        String teamName = args[0];
+        if (args.length == 2) {
+            String teamName = args[0];
+            Team team = Team.valueOf(teamName.toUpperCase());
+            if (args[1].equalsIgnoreCase("banner")) {
+                BattleShips.getInstance().getTeamConfig().setBannerLocation(team, player.getLocation());
+                sender.sendMessage("Banner Location von Team " + team + " gesetzt.");
+                return true;
+            } else if (args[1].equalsIgnoreCase("bannerchest")) {
+                BattleShips.getInstance().getTeamConfig().setChestLocation(team, player.getLocation());
+                sender.sendMessage("Chest Location von Team " + team + " gesetzt.");
+                return true;
+            }
+        }
 
+        if (args[0].equalsIgnoreCase("lobby")) {
+            BattleShips.getInstance().getSettingsConfig().setLobbySpawn(player.getLocation());
+            sender.sendMessage("Lobbyspawn gesetzt.");
+            return true;
+        }
+
+        if (args[0].equalsIgnoreCase("shop")) {
+            BattleShips.getInstance().getSettingsConfig().addVillagerSpawn(player.getLocation());
+            sender.sendMessage("Villagershop gesetzt.");
+            Villager v = (Villager) player.getWorld().spawnEntity(player.getLocation(), EntityType.VILLAGER);
+            v.setCustomName("Shop");
+            v.setAI(false);
+            v.setInvulnerable(true);
+            v.setCanPickupItems(false);
+            v.setRemoveWhenFarAway(false);
+            return true;
+        }
+
+        if (args[0].equalsIgnoreCase("removevillager")) {
+            boolean removed = BattleShips.getInstance().getSettingsConfig().removeVillagerSpawn(player.getLocation());
+            if (removed) {
+                sender.sendMessage("Villager-Spawnpunkt entfernt");
+            } else {
+                sender.sendMessage("An deiner Position befindet sich kein Villager-Spawnpunkt.");
+            }
+            return true;
+        }
+
+        String teamName = args[0];
         Team team = Team.valueOf(teamName.toUpperCase());
+
         BattleShips.getInstance().getTeamConfig().setSpawnLocation(team, player.getLocation());
         sender.sendMessage("Spawn Location von Team " + team + " gesetzt.");
         return true;
     }
+
+
 }
