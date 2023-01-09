@@ -1,5 +1,6 @@
 package me.sk8ingduck.battleships.game;
 
+import de.nandi.chillsuchtapi.api.ChillsuchtAPI;
 import me.sk8ingduck.battleships.BattleShips;
 import me.sk8ingduck.battleships.config.TeamConfig;
 import me.sk8ingduck.battleships.util.ItemBuilder;
@@ -152,13 +153,15 @@ public enum Team {
     public void addMember(Player player) {
         player.sendMessage(BattleShips.getMessagesConfig().get("player.joinTeam").replaceAll("%TEAM%", toString()));
         members.add(player);
-        scoreboardTeam.addPlayer(player);
+        ChillsuchtAPI.getPermissionAPI().removeRank(player, BattleShips.getInstance().getScoreboard());
+        scoreboardTeam.addEntry(player.getName());
     }
 
     public void removeMember(Player player) {
         player.sendMessage(BattleShips.getMessagesConfig().get("player.leaveTeam").replaceAll("%TEAM%", toString()));
         members.remove(player);
-        scoreboardTeam.removePlayer(player);
+        scoreboardTeam.removeEntry(player.getName());
+        ChillsuchtAPI.getPermissionAPI().setRank(player, BattleShips.getInstance().getScoreboard());
     }
 
     public int getSize() {
@@ -218,10 +221,7 @@ public enum Team {
     public static Team[] getActiveTeams() {
         int teamCount = BattleShips.getSettingsConfig().getTeamCount();
         Team[] activeTeams = new Team[teamCount];
-        for (int i = 0; i < teamCount; i++) {
-            activeTeams[i] = values()[i];
-        }
-
+        System.arraycopy(values(), 0, activeTeams, 0, teamCount);
         return activeTeams;
     }
 }
