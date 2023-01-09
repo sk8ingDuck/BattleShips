@@ -1,5 +1,6 @@
 package me.sk8ingduck.battleships.listener;
 
+import de.nandi.chillsuchtapi.api.ChillsuchtAPI;
 import me.sk8ingduck.battleships.BattleShips;
 import me.sk8ingduck.battleships.config.SettingsConfig;
 import me.sk8ingduck.battleships.game.GameSession;
@@ -20,17 +21,7 @@ public class PlayerJoinListener implements Listener {
         SettingsConfig config = BattleShips.getInstance().getSettingsConfig();
         Player player = event.getPlayer();
         player.setScoreboard(BattleShips.getInstance().getScoreboard());
-
-        if (game.getCurrentGameState() != null && game.getCurrentGameState() != GameState.LOBBY) {
-            player.kickPlayer("§cDas Spiel hat bereits angefangen.");
-            event.setJoinMessage(null);
-            return;
-        }
-
-        if (Bukkit.getOnlinePlayers().size() > config.getTeamSize() * config.getTeamCount()) {
-            player.kickPlayer("§cServer ist bereits voll");
-            return;
-        }
+        ChillsuchtAPI.getPermissionAPI().setRank(player, BattleShips.getInstance().getScoreboard());
 
         if (game.getCurrentGameState() == null
                 && Bukkit.getOnlinePlayers().size() >= config.getNeededPlayersToStart()) {
@@ -50,6 +41,5 @@ public class PlayerJoinListener implements Listener {
             player.teleport(config.getLobbySpawn());
 
         event.setJoinMessage("§a" + player.getName() + " §ehat das Spiel betreten.");
-
     }
 }

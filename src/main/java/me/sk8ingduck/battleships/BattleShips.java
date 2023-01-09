@@ -1,6 +1,7 @@
 package me.sk8ingduck.battleships;
 
 import com.google.common.reflect.ClassPath;
+import de.nandi.chillsuchtapi.api.ChillsuchtAPI;
 import me.sk8ingduck.battleships.command.SetspawnCommand;
 import me.sk8ingduck.battleships.config.DBConfig;
 import me.sk8ingduck.battleships.config.SettingsConfig;
@@ -39,7 +40,8 @@ public final class BattleShips extends JavaPlugin {
         instance = this;
 
         scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
-        scoreboard.getTeams().forEach(team -> team.getPlayers().forEach(team::removePlayer));
+        scoreboard.getTeams().forEach(team -> team.getEntries().forEach(team::removeEntry));
+        ChillsuchtAPI.getPermissionAPI().registerRanks(scoreboard);
 
         PluginManager pluginManager = Bukkit.getPluginManager();
         try {

@@ -1,5 +1,6 @@
 package me.sk8ingduck.battleships.listener;
 
+import de.nandi.chillsuchtapi.api.ChillsuchtAPI;
 import me.sk8ingduck.battleships.BattleShips;
 import me.sk8ingduck.battleships.config.SettingsConfig;
 import me.sk8ingduck.battleships.game.GameSession;
@@ -33,6 +34,7 @@ public class PlayerQuitListener implements Listener {
             if (playerTeam != null) {
                 playerTeam.removeMember(player);
             }
+            ChillsuchtAPI.getPermissionAPI().removeRank(player, BattleShips.getInstance().getScoreboard());
             return;
         }
 
