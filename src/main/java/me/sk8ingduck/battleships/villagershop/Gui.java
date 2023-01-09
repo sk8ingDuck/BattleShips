@@ -1,5 +1,6 @@
 package me.sk8ingduck.battleships.villagershop;
 
+import me.sk8ingduck.battleships.BattleShips;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -17,7 +18,7 @@ public abstract class Gui {
 
     protected void buy(Player player, ItemStack item, int cost) {
         if (!player.getInventory().containsAtLeast(new ItemStack(Material.EMERALD), cost)) {
-            player.sendMessage("§cDu hast nicht genug Emeralds.");
+            player.sendMessage(BattleShips.getMessagesConfig().get("error.notEnoughEmeralds"));
             return;
         }
         player.getInventory().removeItem(new ItemStack(Material.EMERALD, cost));

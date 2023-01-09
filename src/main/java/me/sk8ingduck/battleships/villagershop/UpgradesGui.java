@@ -43,7 +43,7 @@ public class UpgradesGui extends Gui {
     }
 
     private void upgrade(Player player, int tntGunLevel, int cost) {
-        Team team = BattleShips.getInstance().getGame().getTeam(player);
+        Team team = BattleShips.getGame().getTeam(player);
         if (team == null) return;
 
         if (team.getTntGunLevel() != tntGunLevel - 1) {
@@ -51,7 +51,7 @@ public class UpgradesGui extends Gui {
             return;
         }
         if (!player.getInventory().containsAtLeast(new ItemStack(Material.EMERALD), cost)) {
-            player.sendMessage("§cDu hast nicht genug Emeralds.");
+            player.sendMessage(BattleShips.getMessagesConfig().get("error.notEnoughEmeralds"));
             return;
         }
 

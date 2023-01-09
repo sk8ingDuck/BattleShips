@@ -11,7 +11,7 @@ public class EntityPickupItemListener implements Listener {
 
     @EventHandler
     public void onEntityPickupItem(EntityPickupItemEvent event) {
-        GameSession game = BattleShips.getInstance().getGame();
+        GameSession game = BattleShips.getGame();
 
         if (game.getCurrentGameState() == null || game.getCurrentGameState() == GameState.LOBBY) {
             event.setCancelled(true);

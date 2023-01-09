@@ -3,11 +3,10 @@ package me.sk8ingduck.battleships;
 import com.google.common.reflect.ClassPath;
 import me.sk8ingduck.battleships.command.SetspawnCommand;
 import me.sk8ingduck.battleships.config.DBConfig;
+import me.sk8ingduck.battleships.config.MessagesConfig;
 import me.sk8ingduck.battleships.config.SettingsConfig;
 import me.sk8ingduck.battleships.config.TeamConfig;
 import me.sk8ingduck.battleships.game.GameSession;
-import me.sk8ingduck.battleships.game.Team;
-import me.sk8ingduck.battleships.listener.PlayerInteractListener;
 import me.sk8ingduck.battleships.mysql.MySQL;
 import me.sk8ingduck.battleships.villagershop.GuiManager;
 import org.bukkit.Bukkit;
@@ -25,12 +24,11 @@ import java.io.IOException;
 public final class BattleShips extends JavaPlugin {
 
     private static BattleShips instance;
-
-    private GameSession game;
-
+    private static GameSession game;
+    private static TeamConfig teamConfig;
+    private static SettingsConfig settingsConfig;
+    private static MessagesConfig messagesConfig;
     private Scoreboard scoreboard;
-    private TeamConfig teamConfig;
-    private SettingsConfig settingsConfig;
 
     private MySQL mySQL;
 
@@ -39,7 +37,7 @@ public final class BattleShips extends JavaPlugin {
         instance = this;
 
         scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
-        scoreboard.getTeams().forEach(team -> team.getPlayers().forEach(team::removePlayer));
+        scoreboard.getTeams().forEach(team -> team.getEntries().forEach(team::removeEntry));
 
         PluginManager pluginManager = Bukkit.getPluginManager();
         try {
@@ -54,12 +52,13 @@ public final class BattleShips extends JavaPlugin {
         } catch (IOException | ClassNotFoundException | IllegalAccessException | InstantiationException e) {
             e.printStackTrace();
         }
-
+        pluginManager.registerEvents(new MenuFunctionListener(), this);
         this.getCommand("setspawn").setExecutor(new SetspawnCommand());
 
         DBConfig dbConfig = new DBConfig("database.yml", getDataFolder());
         teamConfig = new TeamConfig("teams.yml", getDataFolder());
         settingsConfig = new SettingsConfig("settings.yml", getDataFolder());
+        messagesConfig = new MessagesConfig("messages.yml", getDataFolder());
 
         //mySQL = new MySQL(dbConfig.getHost(), dbConfig.getPort(), dbConfig.getUsername(), dbConfig.getPassword(), dbConfig.getDatabase());
         game = new GameSession();
@@ -71,33 +70,29 @@ public final class BattleShips extends JavaPlugin {
             world.getEntities().stream().filter(entity -> entity instanceof ArmorStand).forEach(Entity::remove);
         });
 
-        pluginManager.registerEvents(new MenuFunctionListener(), this);
-
-        Team.getActiveTeams(); //load teams
-    }
-
-    @Override
-    public void onDisable() {
-        // Plugin shutdown logic
     }
 
     public static BattleShips getInstance() {
         return instance;
     }
 
-    public Scoreboard getScoreboard() {
-        return scoreboard;
-    }
-
-    public GameSession getGame() {
+    public static GameSession getGame() {
         return game;
     }
 
-    public TeamConfig getTeamConfig() {
+    public static TeamConfig getTeamConfig() {
         return teamConfig;
     }
 
-    public SettingsConfig getSettingsConfig() {
+    public static SettingsConfig getSettingsConfig() {
         return settingsConfig;
+    }
+
+    public static MessagesConfig getMessagesConfig() {
+        return messagesConfig;
+    }
+
+    public Scoreboard getScoreboard() {
+        return scoreboard;
     }
 }

@@ -11,7 +11,7 @@ public class BlockPlaceListener implements Listener {
 
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
-        GameSession game = BattleShips.getInstance().getGame();
+        GameSession game = BattleShips.getGame();
 
         if (game.getCurrentGameState() == null || game.getCurrentGameState() == GameState.LOBBY) {
             if (!event.getPlayer().isOp()) {

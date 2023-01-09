@@ -1,6 +1,7 @@
 package me.sk8ingduck.battleships.listener;
 
 import me.sk8ingduck.battleships.BattleShips;
+import me.sk8ingduck.battleships.config.MessagesConfig;
 import me.sk8ingduck.battleships.game.GameSession;
 import me.sk8ingduck.battleships.game.Team;
 import org.bukkit.Bukkit;
@@ -21,25 +22,29 @@ public class PlayerDeathListener implements Listener {
                 .collect(Collectors.toList()).clear();
 
         Player player = event.getEntity();
-        Team playerTeam = BattleShips.getInstance().getGame().getTeam(player);
+        Team playerTeam = BattleShips.getGame().getTeam(player);
+        MessagesConfig msgs = BattleShips.getMessagesConfig();
         if (playerTeam == null) return;
 
         if (event.getEntity().getKiller() != null) {
             Player killer = event.getEntity().getKiller();
-            Team killerTeam = BattleShips.getInstance().getGame().getTeam(killer);
+            Team killerTeam = BattleShips.getGame().getTeam(killer);
             if (killerTeam == null) return;
-            event.setDeathMessage(playerTeam.getColor() + player.getName() + " §7wurde von " + killerTeam.getColor() + killer.getName() + " §7getötet.");
+            event.setDeathMessage(msgs.get("player.deathMessage")
+                    .replaceAll("%PLAYER%", playerTeam.getColor() + player.getName())
+                    .replaceAll("%KILLER%", killerTeam.getColor() + killer.getName()));
         } else {
-            event.setDeathMessage(playerTeam.getColor() + player.getName() + " §7ist gestorben.");
+            event.setDeathMessage(msgs.get("player.otherDeathMessage")
+                    .replaceAll("%PLAYER%", playerTeam.getColor() + player.getName()));
         }
 
-        GameSession game = BattleShips.getInstance().getGame();
+        GameSession game = BattleShips.getGame();
 
-        Team stolenBannerTeam = game.getBanner(player);
-        if (stolenBannerTeam != null) {
-            stolenBannerTeam.resetBanner();
-            game.setBannerStolen(null, player);
-            Bukkit.broadcastMessage("§eDer Banner von Team " + stolenBannerTeam + " §ewurde zurückgebracht!");
+        Team bannerOnHead = game.getStolenBanner(player);
+        if (bannerOnHead != null) {
+            bannerOnHead.resetBanner();
+            game.removeStolenBanner(player);
+            Bukkit.broadcastMessage(msgs.get("game.bannerReturned").replaceAll("%TEAM%", bannerOnHead.toString()));
         }
     }
 }

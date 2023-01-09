@@ -1,13 +1,22 @@
 package me.sk8ingduck.battleships.game;
 
 import me.sk8ingduck.battleships.BattleShips;
+import me.sk8ingduck.battleships.config.MessagesConfig;
+import me.sk8ingduck.battleships.config.SettingsConfig;
 import me.sk8ingduck.battleships.event.GameStateChangeEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class GameSession {
+
+    private GameState currentGameState;
+
+    //stores the teams which have at least 1 player at game start time
+    private final ArrayList<Team> playingTeams;
 
     //stores the team of each player
     private final HashMap<Player, Team> playerTeam;
@@ -15,14 +24,13 @@ public class GameSession {
     //stores which player has currently a banner on his head
     private final HashMap<Player, Team> stolenBanners;
 
-    private GameState currentGameState;
-
-    private GameState currentCountdown;
 
     public GameSession() {
+        this.playingTeams = new ArrayList<>();
         this.playerTeam = new HashMap<>();
         this.stolenBanners = new HashMap<>();
     }
+
     public void nextGameState() {
         int index = 0;
         for (int i = 0; i < GameState.values().length; i++) {
@@ -36,22 +44,31 @@ public class GameSession {
     }
 
     public void changeGameState(GameState gameState) {
-        if (currentCountdown != null)
-            currentCountdown.stop();
+        if (currentGameState != null)
+            currentGameState.stop();
 
         Bukkit.getPluginManager().callEvent(new GameStateChangeEvent(currentGameState, gameState));
         currentGameState = gameState;
 
-        if (gameState == null) return;
-
-        currentCountdown = gameState;
-        currentCountdown.start();
+        if (gameState != null)
+            currentGameState.start();
     }
 
     public GameState getCurrentGameState() {
         return currentGameState;
     }
 
+    public void addPlayingTeam(Team team) {
+        playingTeams.add(team);
+    }
+
+    public ArrayList<Team> getPlayingTeams() {
+        return playingTeams;
+    }
+
+    public Team getTeam(Player player) {
+        return playerTeam.get(player);
+    }
 
     public void setTeam(Player player, Team team) {
         playerTeam.put(player, team);
@@ -63,22 +80,20 @@ public class GameSession {
         if (currentTeam == null) return;
 
         currentTeam.removeMember(player);
-        playerTeam.put(player, null);
-    }
-    public Team getTeam(Player player) {
-        return playerTeam.get(player);
+        playerTeam.remove(player);
     }
 
     public void assignTeamToPlayers() {
         Bukkit.getOnlinePlayers().stream().filter(player -> !playerTeam.containsKey(player))
                 .forEach(player -> setTeam(player, getLeastPopulatedTeam()));
     }
+
     private Team getLeastPopulatedTeam() {
         Team leastPopulated = null;
         int leastPopulatedSize = 69;
 
         for (Team team : Team.getActiveTeams()) {
-            if (team.getSize() == BattleShips.getInstance().getSettingsConfig().getTeamSize())
+            if (team.getSize() == BattleShips.getSettingsConfig().getTeamSize())
                 continue; //team is full
 
             if (team.getSize() != 0 && team.getSize() < leastPopulatedSize) { //team is not empty and has least members
@@ -97,14 +112,33 @@ public class GameSession {
         return null;
     }
 
-    public Team getBanner(Player player) {
+    public Team getStolenBanner(Player player) {
         return stolenBanners.get(player);
     }
 
-    public void setBannerStolen(Team team, Player player) {
-        stolenBanners.put(player, team);
-    }
     public void removeStolenBanner(Player player) {
         stolenBanners.remove(player);
     }
+
+    public boolean captureBanner(Player player, Team team) {
+        Team teamOfPlayer = playerTeam.get(player);
+        MessagesConfig msgs = BattleShips.getMessagesConfig();
+        if (currentGameState != GameState.INGAME || teamOfPlayer == null || teamOfPlayer.equals(team)) {
+            return false;
+        }
+
+        if (stolenBanners.get(player) != null) {
+            player.sendMessage(msgs.get("error.alreadyHasBanner"));
+            return false;
+        }
+
+        stolenBanners.put(player, team);
+        team.removeCapturedBanner(team);
+        player.getInventory().setHelmet(new ItemStack(team.getBanner()));
+        Bukkit.broadcastMessage(msgs.get("game.bannerStolen")
+                .replaceAll("%TEAM%", team.toString())
+                .replaceAll("%PLAYER%", teamOfPlayer.getColor() + player.getName()));
+        return true;
+    }
+
 }

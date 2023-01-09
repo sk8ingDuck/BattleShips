@@ -1,6 +1,7 @@
 package me.sk8ingduck.battleships.listener;
 
 import me.sk8ingduck.battleships.BattleShips;
+import me.sk8ingduck.battleships.config.SettingsConfig;
 import me.sk8ingduck.battleships.game.GameSession;
 import me.sk8ingduck.battleships.game.GameState;
 import me.sk8ingduck.battleships.game.Team;
@@ -17,14 +18,13 @@ public class PlayerRespawnListener implements Listener {
     public void onPlayerRespawn(PlayerRespawnEvent event) {
         Player player = event.getPlayer();
 
-        GameSession game = BattleShips.getInstance().getGame();
+        GameSession game = BattleShips.getGame();
         if (game.getCurrentGameState() == null || game.getCurrentGameState() == GameState.LOBBY || game.getCurrentGameState() == GameState.RESTARTING) {
-            player.teleport(BattleShips.getInstance().getSettingsConfig().getLobbySpawn());
+            player.teleport(BattleShips.getSettingsConfig().getLobbySpawn());
         } else if (game.getCurrentGameState() == GameState.WARMUP || game.getCurrentGameState() == GameState.INGAME) {
             Team playerTeam = game.getTeam(player);
-            Bukkit.getScheduler().scheduleSyncDelayedTask(BattleShips.getInstance(), () -> {
-                playerTeam.teleportPlayer(player); //teleport to spawn location of team
-            }, 1);
+            Bukkit.getScheduler().scheduleSyncDelayedTask(BattleShips.getInstance(),
+                    () -> playerTeam.teleportPlayer(player), 1);
             player.getActivePotionEffects().forEach(effect -> player.removePotionEffect(effect.getType()));
         }
     }

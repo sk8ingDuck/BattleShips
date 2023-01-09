@@ -11,7 +11,7 @@ public class EntityDamageListener implements Listener {
 
     @EventHandler
     public void onEntityDamage(EntityDamageEvent event) {
-        GameSession game = BattleShips.getInstance().getGame();
+        GameSession game = BattleShips.getGame();
 
         if (game.getCurrentGameState() == null || game.getCurrentGameState() == GameState.LOBBY) {
             event.setCancelled(true);

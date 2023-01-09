@@ -3,14 +3,17 @@ package me.sk8ingduck.battleships.game;
 import me.sk8ingduck.battleships.BattleShips;
 import me.sk8ingduck.battleships.config.TeamConfig;
 import me.sk8ingduck.battleships.util.ItemBuilder;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.ipvp.canvas.slot.Slot;
 import org.ipvp.canvas.type.ChestMenu;
 
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public enum Team {
 
@@ -22,6 +25,7 @@ public enum Team {
     PURPLE("Lila", "LIGHT_PURPLE", new ItemStack(Material.PURPLE_BANNER), new ItemStack(Material.PURPLE_WOOL)),
     GRAY("Grau", "GRAY", new ItemStack(Material.GRAY_BANNER), new ItemStack(Material.GRAY_WOOL)),
     WHITE("Weiss", "WHITE", new ItemStack(Material.WHITE_BANNER), new ItemStack(Material.WHITE_WOOL));
+
     private org.bukkit.scoreboard.Team scoreboardTeam;
     private final String name;
     private final ChatColor color;
@@ -49,12 +53,11 @@ public enum Team {
         capturedBanners = new ArrayList<>();
         capturedBanners.add(this);
 
-        scoreboardTeam = BattleShips.getInstance().getScoreboard().getTeam("z"+name());
+        scoreboardTeam = BattleShips.getInstance().getScoreboard().getTeam("z" + name());
         if (scoreboardTeam == null)
-            scoreboardTeam = BattleShips.getInstance().getScoreboard().registerNewTeam("z"+name());
+            scoreboardTeam = BattleShips.getInstance().getScoreboard().registerNewTeam("z" + name());
 
         scoreboardTeam.setColor(color);
-        resetBanner();
     }
 
     public String getName() {
@@ -70,7 +73,14 @@ public enum Team {
     }
 
     public void teleportPlayers() {
-        members.forEach(member -> member.teleport(spawnLocation));
+        members.forEach(member -> {
+            member.getInventory().clear();
+            member.setFireTicks(0);
+            member.setHealth(20);
+            member.setFoodLevel(20);
+            member.getActivePotionEffects().forEach(effect -> member.removePotionEffect(effect.getType()));
+            member.teleport(spawnLocation);
+        });
     }
 
     public void teleportPlayer(Player player) {
@@ -90,6 +100,13 @@ public enum Team {
     public void resetBanner() {
         if (bannerLocation != null)
             bannerLocation.getBlock().setType(banner.getType());
+    }
+
+    public void removeBannerAndChest() {
+        if (bannerLocation != null)
+            bannerLocation.getBlock().setType(Material.AIR);
+        if (chestLocation != null)
+            chestLocation.getBlock().setType(Material.AIR);
     }
 
     public Location getBannerLocation() {
@@ -116,7 +133,7 @@ public enum Team {
 
 
     public ItemStack getTeamChooseItem(Player player) {
-        int maxTeamSize = BattleShips.getInstance().getSettingsConfig().getTeamSize();
+        int maxTeamSize = BattleShips.getSettingsConfig().getTeamSize();
         String prefix = maxTeamSize == members.size() ? "§4" : "§a";
         String[] lores = new String[members.size()];
         for (int i = 0; i < members.size(); i++) {
@@ -133,13 +150,13 @@ public enum Team {
     }
 
     public void addMember(Player player) {
-        player.sendMessage("§eDu bist Team " + this + " §ebeigetreten.");
+        player.sendMessage(BattleShips.getMessagesConfig().get("player.joinTeam").replaceAll("%TEAM%", toString()));
         members.add(player);
         scoreboardTeam.addPlayer(player);
     }
 
     public void removeMember(Player player) {
-        player.sendMessage("§eDu hast Team " + this + " §everlassen.");
+        player.sendMessage(BattleShips.getMessagesConfig().get("player.leaveTeam").replaceAll("%TEAM%", toString()));
         members.remove(player);
         scoreboardTeam.removePlayer(player);
     }
@@ -156,10 +173,6 @@ public enum Team {
         tntGunLevel++;
     }
 
-    public boolean hasCapturedBanner(Team team) {
-        return capturedBanners.contains(team);
-    }
-
     public void addCapturedBanner(Team team) {
         if (!capturedBanners.contains(team))
             capturedBanners.add(team);
@@ -169,12 +182,27 @@ public enum Team {
         capturedBanners.remove(team);
     }
 
-    public void openCapturedBannersChest(Player player) {
+    public ChestMenu getCapturedBannersChest() {
         ChestMenu gui = ChestMenu.builder(1).title("Eroberte Banner von " + this).build();
-        for (int i = 0; i < capturedBanners.size(); i++)
-            gui.getSlot(i).setItem(capturedBanners.get(i).getBanner());
+        GameSession game = BattleShips.getGame();
+        AtomicInteger slot = new AtomicInteger();
+        capturedBanners.forEach(bannerTeam -> {
+            Slot guiSlot = gui.getSlot(slot.getAndIncrement());
+            guiSlot.setItem(new ItemBuilder(bannerTeam.getBanner()).setDisplayName("§fBanner von Team " + this).build());
+            guiSlot.setClickHandler((player, clickInformation) -> {
+                if (bannerTeam != this && game.captureBanner(player, bannerTeam))
+                    gui.close();
+            });
+        });
 
-        gui.open(player);
+        return gui;
+    }
+
+    public void checkWin() {
+        if (capturedBanners.size() == BattleShips.getGame().getPlayingTeams().size()) {
+            Bukkit.broadcastMessage(BattleShips.getMessagesConfig().get("game.teamWin").replaceAll("%TEAM%", this.toString()));
+            BattleShips.getGame().nextGameState();
+        }
     }
 
     public void sendMessage(String message) {
@@ -188,7 +216,7 @@ public enum Team {
     }
 
     public static Team[] getActiveTeams() {
-        int teamCount = BattleShips.getInstance().getSettingsConfig().getTeamCount();
+        int teamCount = BattleShips.getSettingsConfig().getTeamCount();
         Team[] activeTeams = new Team[teamCount];
         for (int i = 0; i < teamCount; i++) {
             activeTeams[i] = values()[i];

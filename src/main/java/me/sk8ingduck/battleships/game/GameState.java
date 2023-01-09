@@ -1,6 +1,5 @@
 package me.sk8ingduck.battleships.game;
 
-
 import me.sk8ingduck.battleships.BattleShips;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -16,13 +15,13 @@ public enum GameState {
             int seconds = getSeconds().decrementAndGet();
 
             if (seconds == 0) {
-                BattleShips.getInstance().getGame().nextGameState();
+                BattleShips.getGame().nextGameState();
                 return;
             }
 
             Bukkit.getOnlinePlayers().forEach((Player p) -> p.setLevel(seconds));
             if (seconds % 5 == 0 || seconds <= 3) {
-                Bukkit.broadcastMessage("§aDas Spiel startet in §6" + seconds + " Sekunden");
+                Bukkit.broadcastMessage(BattleShips.getMessagesConfig().get("countdown.lobby").replaceAll("%SECONDS%", String.valueOf(seconds)));
             }
         }
     },
@@ -32,13 +31,13 @@ public enum GameState {
             int seconds = getSeconds().decrementAndGet();
 
             if (seconds == 0) {
-                BattleShips.getInstance().getGame().nextGameState();
+                BattleShips.getGame().nextGameState();
                 return;
             }
 
             Bukkit.getOnlinePlayers().forEach((Player p) -> p.setLevel(seconds));
             if (seconds % 5 == 0 || seconds <= 3) {
-                Bukkit.broadcastMessage("§aDie Runde beginnt in §6" + seconds + " Sekunden");
+                Bukkit.broadcastMessage(BattleShips.getMessagesConfig().get("countdown.warmup").replaceAll("%SECONDS%", String.valueOf(seconds)));
             }
         }
     },
@@ -48,7 +47,7 @@ public enum GameState {
             int seconds = getSeconds().decrementAndGet();
 
             if (seconds == 0) {
-                BattleShips.getInstance().getGame().nextGameState();
+                BattleShips.getGame().nextGameState();
                 return;
             }
 
@@ -68,7 +67,7 @@ public enum GameState {
             Bukkit.getOnlinePlayers().forEach((Player p) -> p.setLevel(seconds));
 
             if (seconds < 10)
-                Bukkit.broadcastMessage("§cDer Server wird in §6" + seconds + " Sekunde(n) §cneugestartet");
+                Bukkit.broadcastMessage(BattleShips.getMessagesConfig().get("countdown.restarting").replaceAll("%SECONDS%", String.valueOf(seconds)));
         }
     };
 
@@ -79,8 +78,7 @@ public enum GameState {
     private BukkitTask bukkitTask;
 
     GameState(int defaultSeconds) {
-        int seconds = (int) BattleShips.getInstance()
-                .getSettingsConfig().getPathOrSet("countdown." + name(), defaultSeconds);
+        int seconds = (int) BattleShips.getSettingsConfig().getPathOrSet("countdown." + name(), defaultSeconds);
         setSeconds(seconds);
     }
 

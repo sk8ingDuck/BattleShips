@@ -1,6 +1,7 @@
 package me.sk8ingduck.battleships.listener;
 
 import me.sk8ingduck.battleships.BattleShips;
+import me.sk8ingduck.battleships.config.MessagesConfig;
 import me.sk8ingduck.battleships.config.SettingsConfig;
 import me.sk8ingduck.battleships.game.GameSession;
 import me.sk8ingduck.battleships.game.GameState;
@@ -16,19 +17,21 @@ public class PlayerJoinListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onJoin(PlayerJoinEvent event) {
-        GameSession game = BattleShips.getInstance().getGame();
-        SettingsConfig config = BattleShips.getInstance().getSettingsConfig();
+        GameSession game = BattleShips.getGame();
+        SettingsConfig config = BattleShips.getSettingsConfig();
+        MessagesConfig msgsConfig = BattleShips.getMessagesConfig();
+
         Player player = event.getPlayer();
         player.setScoreboard(BattleShips.getInstance().getScoreboard());
 
         if (game.getCurrentGameState() != null && game.getCurrentGameState() != GameState.LOBBY) {
-            player.kickPlayer("§cDas Spiel hat bereits angefangen.");
+            player.kickPlayer(msgsConfig.get("error.gameAlreadyStarted"));
             event.setJoinMessage(null);
             return;
         }
 
         if (Bukkit.getOnlinePlayers().size() > config.getTeamSize() * config.getTeamCount()) {
-            player.kickPlayer("§cServer ist bereits voll");
+            player.kickPlayer(msgsConfig.get("error.serverFull"));
             return;
         }
 
@@ -49,7 +52,7 @@ public class PlayerJoinListener implements Listener {
         if (config.getLobbySpawn() != null)
             player.teleport(config.getLobbySpawn());
 
-        event.setJoinMessage("§a" + player.getName() + " §ehat das Spiel betreten.");
+        event.setJoinMessage(msgsConfig.get("player.joinMessage").replaceAll("%PLAYER%", player.getName()));
 
     }
 }
