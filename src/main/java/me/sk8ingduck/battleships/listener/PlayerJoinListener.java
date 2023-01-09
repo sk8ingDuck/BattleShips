@@ -22,16 +22,12 @@ public class PlayerJoinListener implements Listener {
         MessagesConfig msgsConfig = BattleShips.getMessagesConfig();
 
         Player player = event.getPlayer();
-        player.setScoreboard(BattleShips.getInstance().getScoreboard());
+        player.setScoreboard(BattleShips.getScoreboard());
 
         if (game.getCurrentGameState() != null && game.getCurrentGameState() != GameState.LOBBY) {
+            //TODO: spectator join
             player.kickPlayer(msgsConfig.get("error.gameAlreadyStarted"));
             event.setJoinMessage(null);
-            return;
-        }
-
-        if (Bukkit.getOnlinePlayers().size() > config.getTeamSize() * config.getTeamCount()) {
-            player.kickPlayer(msgsConfig.get("error.serverFull"));
             return;
         }
 

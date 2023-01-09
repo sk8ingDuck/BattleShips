@@ -34,7 +34,7 @@ public class PlayerQuitListener implements Listener {
             if (playerTeam != null) {
                 playerTeam.removeMember(player);
             }
-            ChillsuchtAPI.getPermissionAPI().removeRank(player, BattleShips.getInstance().getScoreboard());
+            ChillsuchtAPI.getPermissionAPI().removeRank(player, BattleShips.getScoreboard());
             return;
         }
 

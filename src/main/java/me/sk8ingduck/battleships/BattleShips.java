@@ -11,8 +11,6 @@ import me.sk8ingduck.battleships.mysql.MySQL;
 import me.sk8ingduck.battleships.villagershop.GuiManager;
 import org.bukkit.Bukkit;
 import org.bukkit.GameRule;
-import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.Entity;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -28,7 +26,7 @@ public final class BattleShips extends JavaPlugin {
     private static TeamConfig teamConfig;
     private static SettingsConfig settingsConfig;
     private static MessagesConfig messagesConfig;
-    private Scoreboard scoreboard;
+    private static Scoreboard scoreboard;
 
     private MySQL mySQL;
 
@@ -65,10 +63,7 @@ public final class BattleShips extends JavaPlugin {
 
         GuiManager.init();
 
-        Bukkit.getWorlds().forEach(world -> {
-            world.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false);
-            world.getEntities().stream().filter(entity -> entity instanceof ArmorStand).forEach(Entity::remove);
-        });
+        Bukkit.getWorlds().forEach(world -> world.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false));
 
     }
 
@@ -92,7 +87,7 @@ public final class BattleShips extends JavaPlugin {
         return messagesConfig;
     }
 
-    public Scoreboard getScoreboard() {
+    public static Scoreboard getScoreboard() {
         return scoreboard;
     }
 }

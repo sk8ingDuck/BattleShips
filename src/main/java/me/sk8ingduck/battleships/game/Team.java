@@ -54,9 +54,9 @@ public enum Team {
         capturedBanners = new ArrayList<>();
         capturedBanners.add(this);
 
-        scoreboardTeam = BattleShips.getInstance().getScoreboard().getTeam("z" + name());
+        scoreboardTeam = BattleShips.getScoreboard().getTeam("z" + name());
         if (scoreboardTeam == null)
-            scoreboardTeam = BattleShips.getInstance().getScoreboard().registerNewTeam("z" + name());
+            scoreboardTeam = BattleShips.getScoreboard().registerNewTeam("z" + name());
 
         scoreboardTeam.setColor(color);
     }
@@ -153,7 +153,7 @@ public enum Team {
     public void addMember(Player player) {
         player.sendMessage(BattleShips.getMessagesConfig().get("player.joinTeam").replaceAll("%TEAM%", toString()));
         members.add(player);
-        ChillsuchtAPI.getPermissionAPI().removeRank(player, BattleShips.getInstance().getScoreboard());
+        ChillsuchtAPI.getPermissionAPI().removeRank(player, BattleShips.getScoreboard());
         scoreboardTeam.addEntry(player.getName());
     }
 
@@ -161,7 +161,7 @@ public enum Team {
         player.sendMessage(BattleShips.getMessagesConfig().get("player.leaveTeam").replaceAll("%TEAM%", toString()));
         members.remove(player);
         scoreboardTeam.removeEntry(player.getName());
-        ChillsuchtAPI.getPermissionAPI().setRank(player, BattleShips.getInstance().getScoreboard());
+        ChillsuchtAPI.getPermissionAPI().setRank(player, BattleShips.getScoreboard());
     }
 
     public int getSize() {
