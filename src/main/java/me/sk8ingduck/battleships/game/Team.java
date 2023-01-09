@@ -193,10 +193,7 @@ public enum Team {
     public static Team[] getActiveTeams() {
         int teamCount = BattleShips.getInstance().getSettingsConfig().getTeamCount();
         Team[] activeTeams = new Team[teamCount];
-        for (int i = 0; i < teamCount; i++) {
-            activeTeams[i] = values()[i];
-        }
-
+        System.arraycopy(values(), 0, activeTeams, 0, teamCount);
         return activeTeams;
     }
 }
