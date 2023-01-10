@@ -1,5 +1,6 @@
 package me.sk8ingduck.battleships.listener;
 
+import de.nandi.chillsuchtapi.api.ChillsuchtAPI;
 import me.sk8ingduck.battleships.BattleShips;
 import me.sk8ingduck.battleships.game.GameState;
 import org.bukkit.Bukkit;
@@ -20,7 +21,8 @@ public class PlayerLoginListener implements Listener {
     public void onLogin(PlayerLoginEvent event) {
         if (BattleShips.getGame().getCurrentGameState() != null &&
                 BattleShips.getGame().getCurrentGameState() != GameState.LOBBY) {
-            event.disallow(PlayerLoginEvent.Result.KICK_OTHER, "§cDas Spiel hat bereits angefangen.");
+            event.getPlayer().sendMessage(ChillsuchtAPI.PREFIX + "§cDas Spiel hat bereits angefangen.");
+            event.disallow(PlayerLoginEvent.Result.KICK_OTHER, "");
             return;
         }
         if (event.getResult() != PlayerLoginEvent.Result.KICK_FULL)
@@ -39,8 +41,12 @@ public class PlayerLoginListener implements Listener {
                     return;
                 }
             }
-            event.setKickMessage("§cDie Runde ist schon voll mit Premiums.");
-        } else
-            event.setKickMessage("§cDie Runde ist voll. Hole dir §6Premium§c um vollen Runden beizutreten.");
+            event.getPlayer().sendMessage(ChillsuchtAPI.PREFIX + "§cDie Runde ist schon voll mit Premiums.");
+            event.setKickMessage("");
+        } else {
+            event.getPlayer().sendMessage(ChillsuchtAPI.PREFIX +
+                    "§cDie Runde ist voll. Hole dir §6Premium§c um vollen Runden beizutreten.");
+            event.setKickMessage("");
+        }
     }
 }
