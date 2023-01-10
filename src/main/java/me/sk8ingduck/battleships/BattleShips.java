@@ -1,6 +1,7 @@
 package me.sk8ingduck.battleships;
 
 import com.google.common.reflect.ClassPath;
+import de.nandi.chillsuchtapi.translation.TranslateAPI;
 import me.sk8ingduck.battleships.command.SetspawnCommand;
 import me.sk8ingduck.battleships.command.StartCommand;
 import me.sk8ingduck.battleships.command.StatsCommand;
@@ -10,6 +11,7 @@ import me.sk8ingduck.battleships.config.SettingsConfig;
 import me.sk8ingduck.battleships.config.TeamConfig;
 import me.sk8ingduck.battleships.game.GameSession;
 import me.sk8ingduck.battleships.mysql.MySQL;
+import me.sk8ingduck.battleships.util.TranslateFile;
 import me.sk8ingduck.battleships.villagershop.GuiManager;
 import org.bukkit.Bukkit;
 import org.bukkit.GameRule;
@@ -29,12 +31,19 @@ public final class BattleShips extends JavaPlugin {
     private static SettingsConfig settingsConfig;
     private static MessagesConfig messagesConfig;
     private static Scoreboard scoreboard;
+    private static TranslateAPI translateAPI;
 
     private static MySQL mySQL;
 
     @Override
     public void onEnable() {
         instance = this;
+
+        try {
+            translateAPI = new TranslateAPI(new TranslateFile(this).getTranslateConfig());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
         scoreboard.getTeams().forEach(team -> team.getEntries().forEach(team::removeEntry));
@@ -101,5 +110,9 @@ public final class BattleShips extends JavaPlugin {
 
     public static Scoreboard getScoreboard() {
         return scoreboard;
+    }
+
+    public static TranslateAPI getTranslateAPI() {
+        return translateAPI;
     }
 }

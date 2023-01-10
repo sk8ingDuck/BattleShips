@@ -11,6 +11,10 @@ public class StartCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (!(sender.hasPermission("chillsucht.command.start"))) {
+            BattleShips.getTranslateAPI().sendTranslation(sender, "command.perms");
+            return false;
+        }
         GameSession game = BattleShips.getGame();
         if (game.getCurrentGameState() == null || game.getCurrentGameState() == GameState.LOBBY) {
             game.changeGameState(GameState.LOBBY);

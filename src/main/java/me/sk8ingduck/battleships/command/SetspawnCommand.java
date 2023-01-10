@@ -17,6 +17,10 @@ public class SetspawnCommand implements CommandExecutor {
             sender.sendMessage("Not a player.");
             return true;
         }
+        if (!(player.hasPermission("chillsucht.command.setup"))) {
+            BattleShips.getTranslateAPI().sendTranslation(player,"command.perms");
+            return false;
+        }
         if (args.length != 1 && args.length != 2) {
             sender.sendMessage("Mögliche Befehle:");
             sender.sendMessage("/setspawn <Team>");
