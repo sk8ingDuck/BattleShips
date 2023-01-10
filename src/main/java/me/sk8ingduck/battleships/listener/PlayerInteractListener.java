@@ -23,7 +23,7 @@ public class PlayerInteractListener implements Listener {
         GameSession game = BattleShips.getGame();
         Player player = event.getPlayer();
 
-        if (game.getCurrentGameState() == null || game.getCurrentGameState() == GameState.LOBBY) {
+        if (!game.isIngame()) {
             if (player.getInventory().getItemInMainHand().getType() != Material.AIR
                     && (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)
                     && player.getInventory().getItemInMainHand().getItemMeta().getDisplayName()
@@ -61,15 +61,19 @@ public class PlayerInteractListener implements Listener {
                             return;
                         }
 
+                        game.getStats(player.getUniqueId()).addCapturedBanner();
                         playerTeam.addCapturedBanner(bannerOnHead);
                         game.removeStolenBanner(player);
                         player.getInventory().setHelmet(null);
-                        if (chestTeam.equals(bannerOnHead)) //returned own banner
+                        if (chestTeam.equals(bannerOnHead)) { //returned own banner
                             chestTeam.resetBanner();
+                            chestTeam.addCapturedBanner(chestTeam);
+                        }
+
                         Bukkit.broadcastMessage(BattleShips.getMessagesConfig().get("game.bannerCaptured")
                                 .replaceAll("%TEAM%", bannerOnHead.toString())
-                                .replaceAll("%CAPTURED_TEAM%", playerTeam.toString()));
-                        playerTeam.checkWin();
+                                .replaceAll("%CAPTURE_TEAM%", playerTeam.toString()));
+                        game.checkWin(playerTeam);
                         return;
                     }
 

@@ -1,6 +1,5 @@
 package me.sk8ingduck.battleships.listener;
 
-import de.nandi.chillsuchtapi.api.ChillsuchtAPI;
 import me.sk8ingduck.battleships.BattleShips;
 import me.sk8ingduck.battleships.config.MessagesConfig;
 import me.sk8ingduck.battleships.game.GameSession;
@@ -27,20 +26,25 @@ public class PlayerQuitListener implements Listener {
         }
 
         Player player = event.getPlayer();
-        Team playerTeam = game.getTeam(player);
+        game.saveStats(player.getUniqueId());
 
-        if (game.getCurrentGameState() == null || game.getCurrentGameState() == GameState.LOBBY) {
-            event.setQuitMessage(msgs.get("player.leaveMessage").replaceAll("%PLAYER%", player.getName()));
-            if (playerTeam != null) {
-                playerTeam.removeMember(player);
-            }
-            ChillsuchtAPI.getPermissionAPI().removeRank(player, BattleShips.getScoreboard());
+        Team playerTeam = game.getTeam(player);
+        if (playerTeam != null) {
+            playerTeam.removeMember(player);
+        }
+
+        event.setQuitMessage(msgs.get("player.leaveMessage").replaceAll("%PLAYER%", player.getName()));
+        //ChillsuchtAPI.getPermissionAPI().removeRank(player, BattleShips.getScoreboard());
+
+        if (game.checkWin()) {
             return;
         }
 
         Team bannerOnHead = game.getStolenBanner(player);
         if (bannerOnHead != null) {
             bannerOnHead.resetBanner();
+            bannerOnHead.addCapturedBanner(bannerOnHead);
+            game.checkWin(bannerOnHead);
             game.removeStolenBanner(player);
             Bukkit.broadcastMessage(msgs.get("game.bannerReturned").replaceAll("%TEAM%", bannerOnHead.toString()));
         }

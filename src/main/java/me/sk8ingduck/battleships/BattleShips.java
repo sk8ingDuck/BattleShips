@@ -2,6 +2,8 @@ package me.sk8ingduck.battleships;
 
 import com.google.common.reflect.ClassPath;
 import me.sk8ingduck.battleships.command.SetspawnCommand;
+import me.sk8ingduck.battleships.command.StartCommand;
+import me.sk8ingduck.battleships.command.StatsCommand;
 import me.sk8ingduck.battleships.config.DBConfig;
 import me.sk8ingduck.battleships.config.MessagesConfig;
 import me.sk8ingduck.battleships.config.SettingsConfig;
@@ -28,7 +30,7 @@ public final class BattleShips extends JavaPlugin {
     private static MessagesConfig messagesConfig;
     private static Scoreboard scoreboard;
 
-    private MySQL mySQL;
+    private static MySQL mySQL;
 
     @Override
     public void onEnable() {
@@ -52,19 +54,25 @@ public final class BattleShips extends JavaPlugin {
         }
         pluginManager.registerEvents(new MenuFunctionListener(), this);
         this.getCommand("setspawn").setExecutor(new SetspawnCommand());
+        this.getCommand("stats").setExecutor(new StatsCommand());
+        this.getCommand("start").setExecutor(new StartCommand());
 
         DBConfig dbConfig = new DBConfig("database.yml", getDataFolder());
         teamConfig = new TeamConfig("teams.yml", getDataFolder());
         settingsConfig = new SettingsConfig("settings.yml", getDataFolder());
         messagesConfig = new MessagesConfig("messages.yml", getDataFolder());
 
-        //mySQL = new MySQL(dbConfig.getHost(), dbConfig.getPort(), dbConfig.getUsername(), dbConfig.getPassword(), dbConfig.getDatabase());
+        mySQL = new MySQL();
         game = new GameSession();
 
         GuiManager.init();
 
         Bukkit.getWorlds().forEach(world -> world.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false));
+    }
 
+    @Override
+    public void onDisable() {
+        game.saveStats();
     }
 
     public static BattleShips getInstance() {
@@ -85,6 +93,10 @@ public final class BattleShips extends JavaPlugin {
 
     public static MessagesConfig getMessagesConfig() {
         return messagesConfig;
+    }
+
+    public static MySQL getMySQL() {
+        return mySQL;
     }
 
     public static Scoreboard getScoreboard() {

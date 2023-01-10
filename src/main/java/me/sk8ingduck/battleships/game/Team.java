@@ -153,7 +153,7 @@ public enum Team {
     public void addMember(Player player) {
         player.sendMessage(BattleShips.getMessagesConfig().get("player.joinTeam").replaceAll("%TEAM%", toString()));
         members.add(player);
-        ChillsuchtAPI.getPermissionAPI().removeRank(player, BattleShips.getScoreboard());
+        //ChillsuchtAPI.getPermissionAPI().removeRank(player, BattleShips.getScoreboard());
         scoreboardTeam.addEntry(player.getName());
     }
 
@@ -161,7 +161,7 @@ public enum Team {
         player.sendMessage(BattleShips.getMessagesConfig().get("player.leaveTeam").replaceAll("%TEAM%", toString()));
         members.remove(player);
         scoreboardTeam.removeEntry(player.getName());
-        ChillsuchtAPI.getPermissionAPI().setRank(player, BattleShips.getScoreboard());
+        //ChillsuchtAPI.getPermissionAPI().setRank(player, BattleShips.getScoreboard());
     }
 
     public int getSize() {
@@ -191,28 +191,29 @@ public enum Team {
         AtomicInteger slot = new AtomicInteger();
         capturedBanners.forEach(bannerTeam -> {
             Slot guiSlot = gui.getSlot(slot.getAndIncrement());
-            guiSlot.setItem(new ItemBuilder(bannerTeam.getBanner()).setDisplayName("§fBanner von Team " + this).build());
+            guiSlot.setItem(new ItemBuilder(bannerTeam.getBanner()).setDisplayName("§fBanner von Team " + bannerTeam).build());
             guiSlot.setClickHandler((player, clickInformation) -> {
-                if (bannerTeam != this && game.captureBanner(player, bannerTeam))
+                if (!bannerTeam.equals(this) && !game.getTeam(player).equals(bannerTeam) && game.captureBanner(player, bannerTeam)) {
+                    this.removeCapturedBanner(bannerTeam);
                     gui.close();
+                }
             });
         });
 
         return gui;
     }
 
-    public void checkWin() {
-        if (capturedBanners.size() == BattleShips.getGame().getPlayingTeams().size()) {
-            Bukkit.broadcastMessage(BattleShips.getMessagesConfig().get("game.teamWin").replaceAll("%TEAM%", this.toString()));
-            BattleShips.getGame().nextGameState();
-        }
+    public int getCapturedBanners() {
+        return capturedBanners.size();
     }
 
     public void sendMessage(String message) {
         members.forEach(member -> member.sendMessage(message));
     }
 
-
+    public void addWin() {
+        members.forEach(member -> BattleShips.getGame().getStats(member.getUniqueId()).addGamesWon());
+    }
     @Override
     public String toString() {
         return color + name + "§r";

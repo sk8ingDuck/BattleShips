@@ -11,3 +11,10 @@ commands:
     description: Setspawn command
     usage: /<command>
     permission: battleships.admin
+  stats:
+    description: Stats command
+    usage: /<command>
+  start:
+    description: Start command
+    usage: /<command>
+    permission: battleships.admin

@@ -13,7 +13,7 @@ public class BlockPlaceListener implements Listener {
     public void onBlockPlace(BlockPlaceEvent event) {
         GameSession game = BattleShips.getGame();
 
-        if (game.getCurrentGameState() == null || game.getCurrentGameState() == GameState.LOBBY) {
+        if (!game.isIngame()) {
             if (!event.getPlayer().isOp()) {
                 event.setCancelled(true);
             }

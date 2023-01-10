@@ -11,9 +11,7 @@ public class FoodLevelChangeListener implements Listener {
 
     @EventHandler
     public void onFoodLevelChange(FoodLevelChangeEvent event) {
-        GameSession game = BattleShips.getGame();
-
-        if (game.getCurrentGameState() == null || game.getCurrentGameState() == GameState.LOBBY) {
+        if (!BattleShips.getGame().isIngame()) {
             event.setCancelled(true);
         }
     }

@@ -19,9 +19,9 @@ public class PlayerRespawnListener implements Listener {
         Player player = event.getPlayer();
 
         GameSession game = BattleShips.getGame();
-        if (game.getCurrentGameState() == null || game.getCurrentGameState() == GameState.LOBBY || game.getCurrentGameState() == GameState.RESTARTING) {
+        if (!game.isIngame()) {
             player.teleport(BattleShips.getSettingsConfig().getLobbySpawn());
-        } else if (game.getCurrentGameState() == GameState.WARMUP || game.getCurrentGameState() == GameState.INGAME) {
+        } else {
             Team playerTeam = game.getTeam(player);
             Bukkit.getScheduler().scheduleSyncDelayedTask(BattleShips.getInstance(),
                     () -> playerTeam.teleportPlayer(player), 1);

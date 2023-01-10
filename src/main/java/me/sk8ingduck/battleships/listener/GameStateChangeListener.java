@@ -7,8 +7,10 @@ import me.sk8ingduck.battleships.game.GameSession;
 import me.sk8ingduck.battleships.game.GameState;
 import me.sk8ingduck.battleships.game.Team;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 
@@ -29,10 +31,19 @@ public class GameStateChangeListener implements Listener {
                     team.removeBannerAndChest();
                 }
             }
+            if (game.getPlayingTeams().size() < 2) {
+                event.setCancelled(true);
+                game.changeGameState(GameState.RESTARTING);
+                Bukkit.broadcastMessage("§cNot enough teams.");
+                return;
+            }
+            Bukkit.getOnlinePlayers().forEach(player -> {
+                player.getInventory().addItem(new ItemStack(Material.STONE_PICKAXE));
+                game.getStats(player.getUniqueId()).addGamePlayed();
+            });
         }
 
         if (event.getPreviousGameState() == GameState.WARMUP && event.getNewGameState() == GameState.INGAME) {
-
         }
 
         if (event.getPreviousGameState() == GameState.INGAME && event.getNewGameState() == GameState.RESTARTING) {

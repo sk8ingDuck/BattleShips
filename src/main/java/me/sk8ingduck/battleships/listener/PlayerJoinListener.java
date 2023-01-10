@@ -5,6 +5,7 @@ import me.sk8ingduck.battleships.config.MessagesConfig;
 import me.sk8ingduck.battleships.config.SettingsConfig;
 import me.sk8ingduck.battleships.game.GameSession;
 import me.sk8ingduck.battleships.game.GameState;
+import me.sk8ingduck.battleships.mysql.PlayerStats;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
@@ -22,6 +23,13 @@ public class PlayerJoinListener implements Listener {
         MessagesConfig msgsConfig = BattleShips.getMessagesConfig();
 
         Player player = event.getPlayer();
+
+        if (game.getStats(player.getUniqueId()) == null) {
+            PlayerStats stats = BattleShips.getMySQL().getPlayerStats(player.getUniqueId());
+            if (stats == null) stats = new PlayerStats(0, 0, 0, 0, 0, 0);
+            game.setStats(player.getUniqueId(), stats);
+        }
+
         player.setScoreboard(BattleShips.getScoreboard());
 
         if (game.getCurrentGameState() != null && game.getCurrentGameState() != GameState.LOBBY) {

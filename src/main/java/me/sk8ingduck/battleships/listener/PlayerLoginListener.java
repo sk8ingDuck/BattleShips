@@ -18,8 +18,8 @@ public class PlayerLoginListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onLogin(PlayerLoginEvent event) {
-        if (BattleShips.getInstance().getGame().getCurrentGameState() != null &&
-                BattleShips.getInstance().getGame().getCurrentGameState() != GameState.LOBBY) {
+        if (BattleShips.getGame().getCurrentGameState() != null &&
+                BattleShips.getGame().getCurrentGameState() != GameState.LOBBY) {
             event.disallow(PlayerLoginEvent.Result.KICK_OTHER, "§cDas Spiel hat bereits angefangen.");
             return;
         }

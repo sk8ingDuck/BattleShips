@@ -13,9 +13,7 @@ public class InventoryClickListener implements Listener {
 
     @EventHandler (priority = EventPriority.HIGHEST)
     public void onInventoryClick(InventoryClickEvent event) {
-        GameSession game = BattleShips.getGame();
-
-        if (game.getCurrentGameState() == null || game.getCurrentGameState() == GameState.LOBBY) {
+        if (!BattleShips.getGame().isIngame()) {
             event.setCancelled(true);
         }
     }

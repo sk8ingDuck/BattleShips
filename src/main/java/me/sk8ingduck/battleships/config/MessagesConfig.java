@@ -17,6 +17,17 @@ public class MessagesConfig extends Config {
         msgs.put("player.otherDeathMessage", "%PLAYER% &7ist gestorben.");
         msgs.put("player.joinTeam", "&eDu bist Team %TEAM% &ebeigetreten.");
         msgs.put("player.leaveTeam", "&eDu hast Team %TEAM% &everlassen.");
+        msgs.put("player.stats", """
+                &e---------- &7Stats von %PLAYER% &e----------
+                &7> Kills: &e%KILLS%
+                &7> Deaths: &e%DEATHS%
+                &7> K/D: &e%KILLS_DEATHS_RATIO%
+                &7> Gespielte Spiele: &e%GAMES_PLAYED%
+                &7> Gewonnene Spiele: &e%GAMES_WON%
+                &7> Win/Loss-Rate: &e%WIN_LOSS_RATIO%%
+                &7> Abgebaute Emeralds: &e%FARMED_EMERALDS%
+                &7> Eroberte Banner: &e%CAPTURED_BANNERS%
+                &e---------- &7Stats von %PLAYER% &e----------""");
 
         msgs.put("game.bannerCaptured", "&eDer Banner von Team %TEAM% &ewurde in die Base von Team %CAPTURE_TEAM% &egebracht.");
         msgs.put("game.bannerStolen", "&eDer Banner von Team %TEAM% &ewurde von %PLAYER% &egenommen");

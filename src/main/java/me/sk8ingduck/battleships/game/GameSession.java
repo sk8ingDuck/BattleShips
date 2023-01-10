@@ -4,12 +4,14 @@ import me.sk8ingduck.battleships.BattleShips;
 import me.sk8ingduck.battleships.config.MessagesConfig;
 import me.sk8ingduck.battleships.config.SettingsConfig;
 import me.sk8ingduck.battleships.event.GameStateChangeEvent;
+import me.sk8ingduck.battleships.mysql.PlayerStats;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.UUID;
 
 public class GameSession {
 
@@ -24,11 +26,14 @@ public class GameSession {
     //stores which player has currently a banner on his head
     private final HashMap<Player, Team> stolenBanners;
 
+    //store the stats of each player
+    private final HashMap<UUID, PlayerStats> playerStats;
 
     public GameSession() {
         this.playingTeams = new ArrayList<>();
         this.playerTeam = new HashMap<>();
         this.stolenBanners = new HashMap<>();
+        this.playerStats = new HashMap<>();
     }
 
     public void nextGameState() {
@@ -47,15 +52,22 @@ public class GameSession {
         if (currentGameState != null)
             currentGameState.stop();
 
-        Bukkit.getPluginManager().callEvent(new GameStateChangeEvent(currentGameState, gameState));
+        GameStateChangeEvent event = new GameStateChangeEvent(currentGameState, gameState);
+        Bukkit.getPluginManager().callEvent(event);
+        if (event.isCancelled()) return;
+
         currentGameState = gameState;
 
-        if (gameState != null)
+        if (currentGameState != null)
             currentGameState.start();
     }
 
     public GameState getCurrentGameState() {
         return currentGameState;
+    }
+
+    public boolean isIngame() {
+        return currentGameState == GameState.WARMUP || currentGameState == GameState.INGAME || currentGameState == GameState.RESTARTING;
     }
 
     public void addPlayingTeam(Team team) {
@@ -123,7 +135,7 @@ public class GameSession {
     public boolean captureBanner(Player player, Team team) {
         Team teamOfPlayer = playerTeam.get(player);
         MessagesConfig msgs = BattleShips.getMessagesConfig();
-        if (currentGameState != GameState.INGAME || teamOfPlayer == null || teamOfPlayer.equals(team)) {
+        if (currentGameState != GameState.INGAME || teamOfPlayer == null) {
             return false;
         }
 
@@ -139,6 +151,54 @@ public class GameSession {
                 .replaceAll("%TEAM%", team.toString())
                 .replaceAll("%PLAYER%", teamOfPlayer.getColor() + player.getName()));
         return true;
+    }
+
+    public void checkWin(Team team) {
+        if (team.getCapturedBanners() == playingTeams.size()) {
+            Bukkit.broadcastMessage(BattleShips.getMessagesConfig().get("game.teamWin").replaceAll("%TEAM%", team.toString()));
+            team.addWin();
+            changeGameState(GameState.RESTARTING);
+        }
+    }
+
+
+    public boolean checkWin() {
+        Team winnerTeam = null;
+        for (Team team : playingTeams) {
+            if (team.getSize() > 0) {
+                if (winnerTeam == null) {
+                    winnerTeam = team;
+                } else { //at least 2 teams left
+                    return false;
+                }
+            }
+        }
+        if (winnerTeam == null) { //should not happen
+            changeGameState(GameState.RESTARTING);
+            return true;
+        }
+        //only one team left
+        Bukkit.broadcastMessage(BattleShips.getMessagesConfig().get("game.teamWin").replaceAll("%TEAM%", winnerTeam.toString()));
+        winnerTeam.addWin();
+        changeGameState(GameState.RESTARTING);
+        return true;
+    }
+
+    public PlayerStats getStats(UUID uuid) {
+        return playerStats.get(uuid);
+    }
+
+    public void setStats(UUID uuid, PlayerStats stats) {
+        playerStats.put(uuid, stats);
+    }
+
+    public void saveStats() {
+        playerStats.forEach((player, stats) -> BattleShips.getMySQL().savePlayerStats(player, stats));
+    }
+
+    public void saveStats(UUID uuid) {
+        BattleShips.getMySQL().savePlayerStats(uuid, playerStats.get(uuid));
+        playerStats.remove(uuid); //remove player from playerStats cache otherwise dirty read could occur
     }
 
 }

@@ -7,6 +7,8 @@ import me.sk8ingduck.battleships.game.Team;
 import org.bukkit.Material;
 import org.bukkit.block.Banner;
 import org.bukkit.block.Block;
+import org.bukkit.block.Chest;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -18,7 +20,7 @@ public class BlockBreakListener implements Listener {
     public void onBlockBreak(BlockBreakEvent event) {
         GameSession game = BattleShips.getGame();
 
-        if (game.getCurrentGameState() == null || game.getCurrentGameState() == GameState.LOBBY) {
+        if (!game.isIngame()) {
             if (!event.getPlayer().isOp()) {
                 event.setCancelled(true);
                 return;
@@ -26,7 +28,9 @@ public class BlockBreakListener implements Listener {
         }
 
         Block block = event.getBlock();
+        Player player = event.getPlayer();
         if (block.getType().equals(Material.EMERALD_BLOCK)) {
+            event.setCancelled(true);
             event.setDropItems(false);
 
             block.getWorld().dropItem(block.getLocation(), new ItemStack(Material.EMERALD, 1));
@@ -42,9 +46,22 @@ public class BlockBreakListener implements Listener {
                 && block.getLocation().getBlockY() == team.getBannerLocation().getBlockY()
                 && block.getLocation().getBlockZ() == team.getBannerLocation().getBlockZ()
                 && event.getBlock().getType().equals(team.getBanner().getType())) {
-                    event.setDropItems(false);
-                    event.setCancelled(!game.captureBanner(event.getPlayer(), team));
-
+                    if (BattleShips.getGame().getTeam(player).equals(team)) {
+                        event.setCancelled(true);
+                    } else {
+                        event.setDropItems(false);
+                        event.setCancelled(!game.captureBanner(player, team));
+                    }
+                }
+            }
+        }
+        if (block.getState() instanceof Chest) {
+            for (Team team : game.getPlayingTeams()) {
+                if (block.getLocation().getBlockX() == team.getChestLocation().getBlockX()
+                        && block.getLocation().getBlockY() == team.getChestLocation().getBlockY()
+                        && block.getLocation().getBlockZ() == team.getChestLocation().getBlockZ()) {
+                    event.setCancelled(true);
+                    game.getStats(player.getUniqueId()).addFarmedEmerald();
                 }
             }
         }

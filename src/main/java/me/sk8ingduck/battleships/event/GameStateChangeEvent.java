@@ -1,14 +1,16 @@
 package me.sk8ingduck.battleships.event;
 
 import me.sk8ingduck.battleships.game.GameState;
+import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
-public class GameStateChangeEvent extends Event {
+public class GameStateChangeEvent extends Event implements Cancellable {
 
 
     private final static HandlerList handlerList = new HandlerList();
 
+    private boolean cancelled;
     private final GameState previousGameState;
     private final GameState newGameState;
 
@@ -33,5 +35,15 @@ public class GameStateChangeEvent extends Event {
 
     public static HandlerList getHandlerList() {
         return handlerList;
+    }
+
+    @Override
+    public boolean isCancelled() {
+        return cancelled;
+    }
+
+    @Override
+    public void setCancelled(boolean cancelled) {
+        this.cancelled = cancelled;
     }
 }
