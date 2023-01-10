@@ -5,5 +5,6 @@ TODO:
 - Spielphasen ✓ 
 - TeamManager ✓
 - Config ✓
-- Spiellogik ✗
-- Datenbank ✗
+- Spiellogik ✓
+- Datenbank ✓
+- Bugfixing ✗
