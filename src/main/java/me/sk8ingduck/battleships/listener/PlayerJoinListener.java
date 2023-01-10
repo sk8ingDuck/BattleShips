@@ -1,5 +1,6 @@
 package me.sk8ingduck.battleships.listener;
 
+import de.nandi.chillsuchtapi.api.ChillsuchtAPI;
 import me.sk8ingduck.battleships.BattleShips;
 import me.sk8ingduck.battleships.config.MessagesConfig;
 import me.sk8ingduck.battleships.config.SettingsConfig;
@@ -14,6 +15,11 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerLoginEvent;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class PlayerJoinListener implements Listener {
 
@@ -24,6 +30,37 @@ public class PlayerJoinListener implements Listener {
         MessagesConfig msgsConfig = BattleShips.getMessagesConfig();
 
         Player player = event.getPlayer();
+
+        if (BattleShips.getGame().getCurrentGameState() != null &&
+                BattleShips.getGame().getCurrentGameState() != GameState.LOBBY) {
+            player.sendMessage(ChillsuchtAPI.PREFIX + "§cDas Spiel hat bereits angefangen.");
+            player.kickPlayer(null);
+            return;
+        }
+
+        if (Bukkit.getOnlinePlayers().size() > config.getTeamSize() * config.getTeamCount()) {
+            if (event.getPlayer().hasPermission("chillsucht.join.server")) {
+                List<Player> players = new ArrayList<>(Bukkit.getOnlinePlayers());
+                Collections.shuffle(players);
+                for (Player current : players) {
+                    if (!current.hasPermission("chillsucht.join.server")) {
+                        if (players.size() == Bukkit.getMaxPlayers()) {
+                            current.sendMessage("§cDu wurdest von einem Spieler mit mehr Rechten gekickt. " +
+                                    "Hole dir §6Premium§c um so etwas zu umgehen.");
+                            current.kickPlayer("");
+                        }
+                        return;
+                    }
+                }
+                event.getPlayer().sendMessage(ChillsuchtAPI.PREFIX + "§cDie Runde ist schon voll mit Premiums.");
+                player.kickPlayer("");
+            } else {
+                event.getPlayer().sendMessage(ChillsuchtAPI.PREFIX +
+                        "§cDie Runde ist voll. Hole dir §6Premium§c um vollen Runden beizutreten.");
+                player.kickPlayer("");
+            }
+            return;
+        }
 
         FastBoard fastBoard = new FastBoard(player);
         fastBoard.updateTitle("§bChill§9Sucht §7| §9BattleShips");
