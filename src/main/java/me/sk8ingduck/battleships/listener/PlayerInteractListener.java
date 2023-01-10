@@ -70,6 +70,7 @@ public class PlayerInteractListener implements Listener {
                             chestTeam.addCapturedBanner(chestTeam);
                         }
 
+                        game.updateBoards();
                         Bukkit.broadcastMessage(BattleShips.getMessagesConfig().get("game.bannerCaptured")
                                 .replaceAll("%TEAM%", bannerOnHead.toString())
                                 .replaceAll("%CAPTURE_TEAM%", playerTeam.toString()));

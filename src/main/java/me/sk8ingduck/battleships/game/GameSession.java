@@ -5,6 +5,7 @@ import me.sk8ingduck.battleships.config.MessagesConfig;
 import me.sk8ingduck.battleships.config.SettingsConfig;
 import me.sk8ingduck.battleships.event.GameStateChangeEvent;
 import me.sk8ingduck.battleships.mysql.PlayerStats;
+import me.sk8ingduck.battleships.util.FastBoard;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -16,6 +17,7 @@ import java.util.UUID;
 public class GameSession {
 
     private GameState currentGameState;
+
 
     //stores the teams which have at least 1 player at game start time
     private final ArrayList<Team> playingTeams;
@@ -29,11 +31,15 @@ public class GameSession {
     //store the stats of each player
     private final HashMap<UUID, PlayerStats> playerStats;
 
+    //stores the scoreboard (on the side) of the players
+    private final HashMap<Player, FastBoard> sideBoards;
+
     public GameSession() {
         this.playingTeams = new ArrayList<>();
         this.playerTeam = new HashMap<>();
         this.stolenBanners = new HashMap<>();
         this.playerStats = new HashMap<>();
+        this.sideBoards = new HashMap<>();
     }
 
     public void nextGameState() {
@@ -147,6 +153,7 @@ public class GameSession {
         stolenBanners.put(player, team);
         team.removeCapturedBanner(team);
         player.getInventory().setHelmet(new ItemStack(team.getBanner()));
+        updateBoards();
         Bukkit.broadcastMessage(msgs.get("game.bannerStolen")
                 .replaceAll("%TEAM%", team.toString())
                 .replaceAll("%PLAYER%", teamOfPlayer.getColor() + player.getName()));
@@ -201,4 +208,18 @@ public class GameSession {
         playerStats.remove(uuid); //remove player from playerStats cache otherwise dirty read could occur
     }
 
+    public FastBoard getSideBoard(Player player) {
+        return sideBoards.get(player);
+    }
+
+    public void setSideBoard(Player player, FastBoard fastBoard) {
+        sideBoards.put(player, fastBoard);
+    }
+
+    public void updateBoards() {
+        ArrayList<String> lines = new ArrayList<>();
+        playingTeams.forEach(team -> lines.add(team.getSideBoardText(playingTeams.size())));
+
+        sideBoards.forEach((player, sideBoard) -> sideBoard.updateLines(lines));
+    }
 }

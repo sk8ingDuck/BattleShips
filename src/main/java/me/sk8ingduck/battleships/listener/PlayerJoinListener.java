@@ -6,6 +6,7 @@ import me.sk8ingduck.battleships.config.SettingsConfig;
 import me.sk8ingduck.battleships.game.GameSession;
 import me.sk8ingduck.battleships.game.GameState;
 import me.sk8ingduck.battleships.mysql.PlayerStats;
+import me.sk8ingduck.battleships.util.FastBoard;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
@@ -23,6 +24,10 @@ public class PlayerJoinListener implements Listener {
         MessagesConfig msgsConfig = BattleShips.getMessagesConfig();
 
         Player player = event.getPlayer();
+
+        FastBoard fastBoard = new FastBoard(player);
+        fastBoard.updateTitle("§bChill§9Sucht §7| §9BattleShips");
+        game.setSideBoard(player, fastBoard);
 
         if (game.getStats(player.getUniqueId()) == null) {
             PlayerStats stats = BattleShips.getMySQL().getPlayerStats(player.getUniqueId());

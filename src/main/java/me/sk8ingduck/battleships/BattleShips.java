@@ -18,6 +18,7 @@ import org.bukkit.GameRule;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Scoreboard;
 import org.ipvp.canvas.MenuFunctionListener;
 

@@ -33,7 +33,7 @@ public class BlockBreakListener implements Listener {
             event.setCancelled(true);
             event.setDropItems(false);
 
-            block.getWorld().dropItem(block.getLocation(), new ItemStack(Material.EMERALD, 1));
+            player.getInventory().addItem(new ItemStack(Material.EMERALD));
         }
 
         if (block.getState() instanceof Banner) {

@@ -6,8 +6,10 @@ import me.sk8ingduck.battleships.event.GameStateChangeEvent;
 import me.sk8ingduck.battleships.game.GameSession;
 import me.sk8ingduck.battleships.game.GameState;
 import me.sk8ingduck.battleships.game.Team;
+import me.sk8ingduck.battleships.util.ItemBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
@@ -37,10 +39,13 @@ public class GameStateChangeListener implements Listener {
                 Bukkit.broadcastMessage("§cNot enough teams.");
                 return;
             }
+
             Bukkit.getOnlinePlayers().forEach(player -> {
-                player.getInventory().addItem(new ItemStack(Material.STONE_PICKAXE));
+                player.getInventory().addItem(new ItemBuilder(Material.STONE_PICKAXE).addEnchantment(Enchantment.DIG_SPEED, 3).build());
                 game.getStats(player.getUniqueId()).addGamePlayed();
             });
+
+            game.updateBoards();
         }
 
         if (event.getPreviousGameState() == GameState.WARMUP && event.getNewGameState() == GameState.INGAME) {

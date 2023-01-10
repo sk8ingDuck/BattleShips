@@ -11,7 +11,7 @@ public class PlayerDropItemListener implements Listener {
 
     @EventHandler
     public void onPlayerDropItem(PlayerDropItemEvent event) {
-        if (BattleShips.getGame().isIngame()) {
+        if (!BattleShips.getGame().isIngame()) {
             event.setCancelled(true);
         }
     }

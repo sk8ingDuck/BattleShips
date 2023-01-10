@@ -193,7 +193,9 @@ public enum Team {
             Slot guiSlot = gui.getSlot(slot.getAndIncrement());
             guiSlot.setItem(new ItemBuilder(bannerTeam.getBanner()).setDisplayName("§fBanner von Team " + bannerTeam).build());
             guiSlot.setClickHandler((player, clickInformation) -> {
-                if (!bannerTeam.equals(this) && !game.getTeam(player).equals(bannerTeam) && game.captureBanner(player, bannerTeam)) {
+                if (!bannerTeam.equals(this) //player cant capture banner of team's chest
+                        && !game.getTeam(player).equals(this)  //player cant capture banners of own chest
+                        && game.captureBanner(player, bannerTeam)) { //cant capture banner for other reason
                     this.removeCapturedBanner(bannerTeam);
                     gui.close();
                 }
@@ -214,15 +216,18 @@ public enum Team {
     public void addWin() {
         members.forEach(member -> BattleShips.getGame().getStats(member.getUniqueId()).addGamesWon());
     }
-    @Override
-    public String toString() {
-        return color + name + "§r";
-    }
-
     public static Team[] getActiveTeams() {
         int teamCount = BattleShips.getSettingsConfig().getTeamCount();
         Team[] activeTeams = new Team[teamCount];
         System.arraycopy(values(), 0, activeTeams, 0, teamCount);
         return activeTeams;
+    }
+
+    public String getSideBoardText(int playingTeams) {
+        return (capturedBanners.contains(this) ? "§a✓" : "§4✗") + " " + this + " §7(" + capturedBanners.size() + "/" + playingTeams + ")";
+    }//
+    @Override
+    public String toString() {
+        return color + name + "§r";
     }
 }

@@ -15,8 +15,12 @@ public class PlayerQuitListener implements Listener {
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
+        Player player = event.getPlayer();
+
         GameSession game = BattleShips.getGame();
         MessagesConfig msgs = BattleShips.getMessagesConfig();
+
+        game.getSideBoard(player).delete();
 
         if (game.getCurrentGameState() != null
                 && game.getCurrentGameState() == GameState.LOBBY
@@ -25,7 +29,6 @@ public class PlayerQuitListener implements Listener {
             game.changeGameState(null);
         }
 
-        Player player = event.getPlayer();
         game.saveStats(player.getUniqueId());
 
         Team playerTeam = game.getTeam(player);
