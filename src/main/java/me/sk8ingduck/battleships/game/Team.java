@@ -180,6 +180,10 @@ public enum Team {
         return members.size();
     }
 
+    public ArrayList<Player> getMembers() {
+        return members;
+    }
+
     public int getTntGunLevel() {
         return tntGunLevel;
     }

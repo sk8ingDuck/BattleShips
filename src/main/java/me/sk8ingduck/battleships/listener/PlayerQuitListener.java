@@ -12,32 +12,38 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 public class PlayerQuitListener implements Listener {
 
-    @EventHandler
-    public void onPlayerQuit(PlayerQuitEvent event) {
-        Player player = event.getPlayer();
+	@EventHandler
+	public void onPlayerQuit(PlayerQuitEvent event) {
+		Player player = event.getPlayer();
 
-        GameSession game = BattleShips.getGame();
-        MessagesConfig msgs = BattleShips.getMessagesConfig();
+		GameSession game = BattleShips.getGame();
+		MessagesConfig msgs = BattleShips.getMessagesConfig();
 
-        game.removeTeam(player);
-        game.removeSideBoard(player);
-        game.saveStats(player.getUniqueId());
+		game.removeTeam(player);
+		game.removeSideBoard(player);
+		game.saveStats(player.getUniqueId());
 
-        event.setQuitMessage(msgs.get("player.leaveMessage").replaceAll("%PLAYER%", player.getName()));
+		if (game.isIngame() && game.getTeam(player) == null) {
+			event.setQuitMessage(null);
+			return;
+		}
 
-        if (game.getCurrentGameState() != null
-                && game.getCurrentGameState() == GameState.LOBBY
-                && Bukkit.getOnlinePlayers().size() <= BattleShips.getSettingsConfig().getNeededPlayersToStart()) {
-            GameState.LOBBY.resetCountdown();
-            game.changeGameState(null);
-        }
+		event.setQuitMessage(msgs.get("player.leaveMessage").replaceAll("%PLAYER%", player.getName()));
 
-        //ChillsuchtAPI.getPermissionAPI().removeRank(player, BattleShips.getScoreboard());
 
-        if (game.isIngame() && game.checkWin()) {
-            return;
-        }
+		if (game.getCurrentGameState() != null
+				&& game.getCurrentGameState() == GameState.LOBBY
+				&& Bukkit.getOnlinePlayers().size() <= BattleShips.getSettingsConfig().getNeededPlayersToStart()) {
+			GameState.LOBBY.resetCountdown();
+			game.changeGameState(null);
+		}
 
-        game.resetBanner(player);
-    }
+		//ChillsuchtAPI.getPermissionAPI().removeRank(player, BattleShips.getScoreboard());
+
+		if (game.isIngame() && game.checkWin()) {
+			return;
+		}
+
+		game.resetBanner(player);
+	}
 }

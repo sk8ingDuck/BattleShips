@@ -26,7 +26,7 @@ public class SetspawnCommand implements CommandExecutor {
             sender.sendMessage("Mögliche Befehle:");
             sender.sendMessage("/setspawn <Team>");
             sender.sendMessage("/setspawn <Team> <banner | bannerChest | tntgun>");
-            sender.sendMessage("/setspawn <lobby | spectatorspawn | shop>");
+            sender.sendMessage("/setspawn <lobby | spectator | shop>");
             return true;
         }
 
@@ -52,6 +52,12 @@ public class SetspawnCommand implements CommandExecutor {
         if (args[0].equalsIgnoreCase("lobby")) {
             BattleShips.getSettingsConfig().setLobbySpawn(player.getLocation());
             sender.sendMessage("Lobbyspawn gesetzt.");
+            return true;
+        }
+
+        if (args[0].equalsIgnoreCase("spectator")) {
+            BattleShips.getSettingsConfig().setSpectatorSpawn(player.getLocation());
+            sender.sendMessage("Spectatorspawn gesetzt.");
             return true;
         }
 

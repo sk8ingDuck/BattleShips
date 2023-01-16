@@ -5,7 +5,9 @@ import me.sk8ingduck.battleships.config.MessagesConfig;
 import me.sk8ingduck.battleships.event.GameStateChangeEvent;
 import me.sk8ingduck.battleships.mysql.PlayerStats;
 import me.sk8ingduck.battleships.util.FastBoard;
+import me.sk8ingduck.battleships.util.ItemBuilder;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -217,7 +219,7 @@ public class GameSession {
 	}
 
 	public void saveStats(UUID uuid) {
-		if (playerStats.get(uuid) == null) return;
+		if (!playerStats.containsKey(uuid)) return;
 
 		BattleShips.getMySQL().savePlayerStats(uuid, playerStats.get(uuid));
 		playerStats.remove(uuid); //remove player from playerStats cache otherwise dirty read could occur
@@ -228,6 +230,8 @@ public class GameSession {
 	}
 
 	public void removeSideBoard(Player player) {
+		if (!sideBoards.containsKey(player)) return;
+
 		sideBoards.get(player).delete();
 		sideBoards.remove(player);
 	}
@@ -245,5 +249,20 @@ public class GameSession {
 			}
 			sideboard.updateLines(lines);
 		});
+	}
+
+	public void setSpectator(Player player) {
+		player.teleport(BattleShips.getSettingsConfig().getSpectatorSpawn());
+		player.getInventory().clear();
+		player.setAllowFlight(true);
+		player.spigot().setCollidesWithEntities(false);
+		Bukkit.getOnlinePlayers().forEach(otherPlayer -> {
+			otherPlayer.hidePlayer(player); //set spectator invisible for all other players
+
+			if (playerTeam.get(otherPlayer.getUniqueId()) == null)
+				player.hidePlayer(otherPlayer); //if otherPlayer is spectator as well, set otherPlayer invisible for player
+		});
+
+		player.getInventory().setItem(4, BattleShips.getSettingsConfig().getTeleportItem());
 	}
 }

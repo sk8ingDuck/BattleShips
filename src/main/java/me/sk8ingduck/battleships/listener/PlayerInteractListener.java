@@ -7,6 +7,7 @@ import me.sk8ingduck.battleships.game.GameSession;
 import me.sk8ingduck.battleships.game.GameState;
 import me.sk8ingduck.battleships.game.Team;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -14,6 +15,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.SkullMeta;
 import org.ipvp.canvas.type.ChestMenu;
 
 public class PlayerInteractListener implements Listener {
@@ -33,6 +36,16 @@ public class PlayerInteractListener implements Listener {
                 return;
             }
         }
+
+        if (game.isIngame()
+                && player.getInventory().getItemInMainHand().getType() != Material.AIR
+                && (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)
+                && game.getTeam(player) == null
+                && player.getInventory().getItemInMainHand().getItemMeta().getDisplayName()
+                .equals(BattleShips.getSettingsConfig().getTeleportItem().getItemMeta().getDisplayName())) {
+            compassGui().open(player);
+        }
+
 
 
         //prevent farm trampling
@@ -115,5 +128,29 @@ public class PlayerInteractListener implements Listener {
         }
 
         return gui;
+    }
+
+    private ChestMenu compassGui() {
+        GameSession game = BattleShips.getGame();
+
+        ChestMenu gui = ChestMenu.builder(3).title("§5Teleporter").build();
+        int slot = 0;
+        for (Team team : game.getPlayingTeams()) { //get all teams
+            for (Player member : team.getMembers()) { //get all members of each team
+                gui.getSlot(slot).setItem(getHead(member.getName(), team.getColor())); //add player head of team member
+                gui.getSlot(slot++).setClickHandler((player, clickInformation) ->
+                        player.teleport(member.getLocation())); //teleport spectator to player on click
+            }
+        }
+
+        return gui;
+    }
+    private ItemStack getHead(String name, ChatColor color) {
+        ItemStack head = new ItemStack(Material.PLAYER_HEAD);
+        SkullMeta headMeta = (SkullMeta) head.getItemMeta();
+        headMeta.setDisplayName(color + name);
+        headMeta.setOwner(name);
+        head.setItemMeta(headMeta);
+        return head;
     }
 }

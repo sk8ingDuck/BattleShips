@@ -5,17 +5,15 @@ import me.sk8ingduck.battleships.game.GameSession;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityPickupItemEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 
-public class EntityPickupItemListener implements Listener {
+public class EntityDamageByEntityListener implements Listener {
 
 	@EventHandler
-	public void onEntityPickupItem(EntityPickupItemEvent event) {
+	public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
 		GameSession game = BattleShips.getGame();
-		if (!game.isIngame()) {
-			event.setCancelled(true);
-		}
-		if (event.getEntity() instanceof Player player && game.getTeam(player) == null) {
+
+		if (event.getDamager() instanceof Player && game.getTeam((Player) event.getDamager()) == null) {
 			event.setCancelled(true);
 		}
 	}

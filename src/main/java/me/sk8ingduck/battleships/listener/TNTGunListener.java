@@ -2,16 +2,14 @@ package me.sk8ingduck.battleships.listener;
 
 import me.sk8ingduck.battleships.BattleShips;
 import me.sk8ingduck.battleships.game.GameSession;
-import me.sk8ingduck.battleships.game.GameState;
 import me.sk8ingduck.battleships.game.Team;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.ExplosionPrimeEvent;
@@ -71,7 +69,7 @@ public class TNTGunListener implements Listener {
 				tnt.setIsIncendiary(false);
 				tnt.setTicksLived(5);
 				tnt.setFuseTicks(100);
-				tnt.setYield(team.getTntGunLevel() * 2);
+				tnt.setCustomName(String.valueOf(team.getTntGunLevel() * 2));
 
 				event.setCancelled(true);
 				Bukkit.getScheduler().scheduleSyncDelayedTask(BattleShips.getInstance(), () -> {
@@ -97,6 +95,19 @@ public class TNTGunListener implements Listener {
 	public void onPlayerDropItem(PlayerDropItemEvent event) {
 		if (event.getPlayer().getInventory().getItemInMainHand().equals(BattleShips.getSettingsConfig().getTntGunItem())) {
 			event.setCancelled(true);
+		}
+	}
+
+	@EventHandler
+	public void onExplosionPrime(ExplosionPrimeEvent event) {
+		if (event.getEntity() instanceof TNTPrimed tnt) {
+			event.setCancelled(true);
+			Location location = event.getEntity().getLocation();
+			if (tnt.getCustomName() != null) {
+				int power = Integer.parseInt(tnt.getCustomName());
+				location.getWorld().createExplosion(location.getX(), location.getY(), location.getZ(), power, false, false);
+			}
+
 		}
 	}
 }

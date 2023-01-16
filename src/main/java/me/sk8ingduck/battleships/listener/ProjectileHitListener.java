@@ -15,10 +15,10 @@ public class ProjectileHitListener implements Listener {
 			Player player = (Player) event.getEntity().getShooter();
 			if (event.getHitEntity() != null) {
 				Location location = event.getHitEntity().getLocation();
-				location.getWorld().createExplosion(location.getX(), location.getY(), location.getZ(), 5, false, true);
+				location.getWorld().createExplosion(location.getX(), location.getY(), location.getZ(), 5, false, false);
 			} else if (event.getHitBlock() != null) {
 				Location location = event.getHitBlock().getLocation();
-				location.getWorld().createExplosion(location.getX(), location.getY(), location.getZ(), 5, false, true);
+				location.getWorld().createExplosion(location.getX(), location.getY(), location.getZ(), 5, false, false);
 			}
 		}
 	}

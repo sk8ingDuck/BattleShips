@@ -15,7 +15,10 @@ public class SettingsConfig extends Config {
     private final int neededPlayersToStart;
     private final ItemStack teamChooserItem;
     private final ItemStack tntGunItem;
+    private final ItemStack teleportItem;
     private Location lobbySpawn;
+    private Location spectatorSpawn;
+
 
     public SettingsConfig(String name, File path) {
         super(name, path);
@@ -26,7 +29,10 @@ public class SettingsConfig extends Config {
         this.teamChooserItem = (ItemStack) getPathOrSet("teamChooserItem", new ItemBuilder(Material.CHEST).setDisplayName("Team auswählen").build());
         this.tntGunItem = (ItemStack) getPathOrSet("tntGunItem", new ItemBuilder(Material.CROSSBOW).setGlowing()
                 .setDisplayName("§0§kO §cTNT-Gun §0§kO").setDamage(464).setCrossBowCharged().build());
+        this.teleportItem = (ItemStack) getPathOrSet("teleportItem", new ItemBuilder(Material.COMPASS).setDisplayName("§5Teleporter").build());
         this.lobbySpawn = (Location) getPathOrSet("lobbySpawn", null);
+        this.lobbySpawn = (Location) getPathOrSet("spectatorSpawn", null);
+
     }
 
     public String getMapName() {
@@ -52,13 +58,27 @@ public class SettingsConfig extends Config {
         return tntGunItem;
     }
 
+    public ItemStack getTeleportItem() {
+        return teleportItem;
+    }
+
     public Location getLobbySpawn() {
         return lobbySpawn;
+    }
+
+    public Location getSpectatorSpawn() {
+        return spectatorSpawn;
     }
 
     public void setLobbySpawn(Location lobbySpawn) {
         this.lobbySpawn = lobbySpawn;
         getFileConfiguration().set("lobbySpawn", lobbySpawn);
+        save();
+    }
+
+    public void setSpectatorSpawn(Location spectatorSpawn) {
+        this.spectatorSpawn = spectatorSpawn;
+        getFileConfiguration().set("spectatorSpawn", spectatorSpawn);
         save();
     }
 
