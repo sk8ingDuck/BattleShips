@@ -33,6 +33,7 @@ public class BlockBreakListener implements Listener {
             event.setCancelled(true);
             event.setDropItems(false);
 
+            game.getStats(player.getUniqueId()).addFarmedEmerald();
             player.getInventory().addItem(new ItemStack(Material.EMERALD));
         }
 
@@ -61,7 +62,6 @@ public class BlockBreakListener implements Listener {
                         && block.getLocation().getBlockY() == team.getChestLocation().getBlockY()
                         && block.getLocation().getBlockZ() == team.getChestLocation().getBlockZ()) {
                     event.setCancelled(true);
-                    game.getStats(player.getUniqueId()).addFarmedEmerald();
                 }
             }
         }

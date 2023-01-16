@@ -10,6 +10,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitTask;
 import org.ipvp.canvas.slot.Slot;
 import org.ipvp.canvas.type.ChestMenu;
 
@@ -33,11 +34,15 @@ public enum Team {
     private Location spawnLocation;
     private Location bannerLocation;
     private Location chestLocation;
+    private Location tntGunLocation;
     private final ItemStack banner;
     private final ItemStack teamChooseItem;
     private final ArrayList<Player> members;
     private int tntGunLevel;
+    private int tntGunCooldown;
     private final ArrayList<Team> capturedBanners;
+
+    private BukkitTask cooldown;
 
     Team(String defaultName, String defaultColor, ItemStack defaultBannerItem, ItemStack defaultTeamChooseItem) {
 
@@ -47,10 +52,12 @@ public enum Team {
         this.spawnLocation = (Location) teamConfig.getPathOrSet("team." + name() + ".spawnLocation", null);
         this.bannerLocation = (Location) teamConfig.getPathOrSet("team." + name() + ".bannerLocation", null);
         this.chestLocation = (Location) teamConfig.getPathOrSet("team." + name() + ".chestLocation", null);
+        this.tntGunLocation = (Location) teamConfig.getPathOrSet("team." + name() + ".tntGunLocation", null);
         this.banner = (ItemStack) teamConfig.getPathOrSet("team." + name() + ".bannerItem", defaultBannerItem);
         this.teamChooseItem = (ItemStack) teamConfig.getPathOrSet("team." + name() + ".teamChooseItem", defaultTeamChooseItem);
         this.members = new ArrayList<>();
-        this.tntGunLevel = 0;
+        this.tntGunLevel = 1;
+        setTntGunCooldown(10);
         capturedBanners = new ArrayList<>();
         capturedBanners.add(this);
 
@@ -132,6 +139,13 @@ public enum Team {
         this.chestLocation.getBlock().setType(Material.CHEST);
     }
 
+    public Location getTntGunLocation() {
+        return tntGunLocation;
+    }
+
+    public void setTntGunLocation(Location tntGunLocation) {
+        this.tntGunLocation = tntGunLocation;
+    }
 
     public ItemStack getTeamChooseItem(Player player) {
         int maxTeamSize = BattleShips.getSettingsConfig().getTeamSize();
@@ -151,14 +165,12 @@ public enum Team {
     }
 
     public void addMember(Player player) {
-        player.sendMessage(BattleShips.getMessagesConfig().get("player.joinTeam").replaceAll("%TEAM%", toString()));
         members.add(player);
         //ChillsuchtAPI.getPermissionAPI().removeRank(player, BattleShips.getScoreboard());
         scoreboardTeam.addEntry(player.getName());
     }
 
     public void removeMember(Player player) {
-        player.sendMessage(BattleShips.getMessagesConfig().get("player.leaveTeam").replaceAll("%TEAM%", toString()));
         members.remove(player);
         scoreboardTeam.removeEntry(player.getName());
         //ChillsuchtAPI.getPermissionAPI().setRank(player, BattleShips.getScoreboard());
@@ -174,6 +186,23 @@ public enum Team {
 
     public void increaseTntGunLevel() {
         tntGunLevel++;
+    }
+
+    public int getTntGunCooldown() {
+        return tntGunCooldown;
+    }
+
+    public void setTntGunCooldown(int tntGunCooldown) {
+        this.tntGunCooldown = tntGunCooldown;
+
+        cooldown = Bukkit.getScheduler().runTaskTimer(BattleShips.getInstance(), () -> {
+            this.tntGunCooldown--;
+            if (this.tntGunCooldown == 0) cooldown.cancel();
+        }, 0, 20);
+    }
+
+    public boolean isCooldownActive() {
+        return tntGunCooldown != 0;
     }
 
     public void addCapturedBanner(Team team) {
@@ -225,7 +254,8 @@ public enum Team {
 
     public String getSideBoardText(int playingTeams) {
         return (capturedBanners.contains(this) ? "§a✓" : "§4✗") + " " + this + " §7(" + capturedBanners.size() + "/" + playingTeams + ")";
-    }//
+    }
+
     @Override
     public String toString() {
         return color + name + "§r";

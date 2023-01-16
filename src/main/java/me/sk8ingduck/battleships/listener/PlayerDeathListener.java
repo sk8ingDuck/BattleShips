@@ -43,13 +43,6 @@ public class PlayerDeathListener implements Listener {
         }
 
 
-        Team bannerOnHead = game.getStolenBanner(player);
-        if (bannerOnHead != null) {
-            bannerOnHead.resetBanner();
-            bannerOnHead.addCapturedBanner(bannerOnHead);
-            game.checkWin(bannerOnHead);
-            game.removeStolenBanner(player);
-            Bukkit.broadcastMessage(msgs.get("game.bannerReturned").replaceAll("%TEAM%", bannerOnHead.toString()));
-        }
+        game.resetBanner(player);
     }
 }

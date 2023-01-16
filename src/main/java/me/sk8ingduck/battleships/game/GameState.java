@@ -47,6 +47,7 @@ public enum GameState {
             int seconds = getSeconds().decrementAndGet();
 
             if (seconds == 0) {
+                Bukkit.broadcastMessage(BattleShips.getMessagesConfig().get("game.nobodyWon"));
                 BattleShips.getGame().nextGameState();
                 return;
             }

@@ -2,7 +2,6 @@ package me.sk8ingduck.battleships.game;
 
 import me.sk8ingduck.battleships.BattleShips;
 import me.sk8ingduck.battleships.config.MessagesConfig;
-import me.sk8ingduck.battleships.config.SettingsConfig;
 import me.sk8ingduck.battleships.event.GameStateChangeEvent;
 import me.sk8ingduck.battleships.mysql.PlayerStats;
 import me.sk8ingduck.battleships.util.FastBoard;
@@ -16,210 +15,235 @@ import java.util.UUID;
 
 public class GameSession {
 
-    private GameState currentGameState;
+	private GameState currentGameState;
 
 
-    //stores the teams which have at least 1 player at game start time
-    private final ArrayList<Team> playingTeams;
+	//stores the teams which have at least 1 player at game start time
+	private final ArrayList<Team> playingTeams;
 
-    //stores the team of each player
-    private final HashMap<Player, Team> playerTeam;
+	//stores the team of each player
+	private final HashMap<UUID, Team> playerTeam;
 
-    //stores which player has currently a banner on his head
-    private final HashMap<Player, Team> stolenBanners;
+	//stores which player has currently a banner on his head
+	private final HashMap<Player, Team> stolenBanners;
 
-    //store the stats of each player
-    private final HashMap<UUID, PlayerStats> playerStats;
+	//store the stats of each player
+	private final HashMap<UUID, PlayerStats> playerStats;
 
-    //stores the scoreboard (on the side) of the players
-    private final HashMap<Player, FastBoard> sideBoards;
+	//stores the scoreboard (on the side) of the players
+	private final HashMap<Player, FastBoard> sideBoards;
 
-    public GameSession() {
-        this.playingTeams = new ArrayList<>();
-        this.playerTeam = new HashMap<>();
-        this.stolenBanners = new HashMap<>();
-        this.playerStats = new HashMap<>();
-        this.sideBoards = new HashMap<>();
-    }
+	public GameSession() {
+		this.playingTeams = new ArrayList<>();
+		this.playerTeam = new HashMap<>();
+		this.stolenBanners = new HashMap<>();
+		this.playerStats = new HashMap<>();
+		this.sideBoards = new HashMap<>();
+	}
 
-    public void nextGameState() {
-        int index = 0;
-        for (int i = 0; i < GameState.values().length; i++) {
-            if (GameState.values()[i] == currentGameState) {
-                index = i;
-            }
-        }
-        index = index >= GameState.values().length ? 0 : index + 1;
+	public void nextGameState() {
+		int index = 0;
+		for (int i = 0; i < GameState.values().length; i++) {
+			if (GameState.values()[i] == currentGameState) {
+				index = i;
+			}
+		}
+		index = index >= GameState.values().length ? 0 : index + 1;
 
-        changeGameState(GameState.values()[index]);
-    }
+		changeGameState(GameState.values()[index]);
+	}
 
-    public void changeGameState(GameState gameState) {
-        if (currentGameState != null)
-            currentGameState.stop();
+	public void changeGameState(GameState gameState) {
+		if (currentGameState != null)
+			currentGameState.stop();
 
-        GameStateChangeEvent event = new GameStateChangeEvent(currentGameState, gameState);
-        Bukkit.getPluginManager().callEvent(event);
-        if (event.isCancelled()) return;
+		GameStateChangeEvent event = new GameStateChangeEvent(currentGameState, gameState);
+		Bukkit.getPluginManager().callEvent(event);
+		if (event.isCancelled()) return;
 
-        currentGameState = gameState;
+		currentGameState = gameState;
 
-        if (currentGameState != null)
-            currentGameState.start();
-    }
+		if (currentGameState != null)
+			currentGameState.start();
+	}
 
-    public GameState getCurrentGameState() {
-        return currentGameState;
-    }
+	public GameState getCurrentGameState() {
+		return currentGameState;
+	}
 
-    public boolean isIngame() {
-        return currentGameState == GameState.WARMUP || currentGameState == GameState.INGAME || currentGameState == GameState.RESTARTING;
-    }
+	public boolean isIngame() {
+		return currentGameState == GameState.WARMUP || currentGameState == GameState.INGAME || currentGameState == GameState.RESTARTING;
+	}
 
-    public void addPlayingTeam(Team team) {
-        playingTeams.add(team);
-    }
+	public void addPlayingTeam(Team team) {
+		playingTeams.add(team);
+	}
 
-    public ArrayList<Team> getPlayingTeams() {
-        return playingTeams;
-    }
+	public ArrayList<Team> getPlayingTeams() {
+		return playingTeams;
+	}
 
-    public Team getTeam(Player player) {
-        return playerTeam.get(player);
-    }
+	public Team getTeam(Player player) {
+		return playerTeam.get(player.getUniqueId());
+	}
 
-    public void setTeam(Player player, Team team) {
-        playerTeam.put(player, team);
-        team.addMember(player);
-    }
+	public void setTeam(Player player, Team team) {
+		playerTeam.put(player.getUniqueId(), team);
+		team.addMember(player);
+		player.sendMessage(BattleShips.getMessagesConfig().get("player.joinTeam").replaceAll("%TEAM%", team.toString()));
+	}
 
-    public void removeTeam(Player player) {
-        Team currentTeam = playerTeam.get(player);
-        if (currentTeam == null) return;
+	public void removeTeam(Player player) {
+		Team currentTeam = playerTeam.get(player.getUniqueId());
+		if (currentTeam == null) return;
 
-        currentTeam.removeMember(player);
-        playerTeam.remove(player);
-    }
+		currentTeam.removeMember(player);
+		playerTeam.remove(player.getUniqueId());
 
-    public void assignTeamToPlayers() {
-        Bukkit.getOnlinePlayers().stream().filter(player -> !playerTeam.containsKey(player))
-                .forEach(player -> setTeam(player, getLeastPopulatedTeam()));
-    }
+		player.sendMessage(BattleShips.getMessagesConfig().get("player.leaveTeam").replaceAll("%TEAM%", currentTeam.toString()));
+	}
 
-    private Team getLeastPopulatedTeam() {
-        Team leastPopulated = null;
-        int leastPopulatedSize = 69;
+	public void assignTeamToPlayers() {
+		Bukkit.getOnlinePlayers().stream().filter(player -> !playerTeam.containsKey(player.getUniqueId()))
+				.forEach(player -> setTeam(player, getLeastPopulatedTeam()));
+	}
 
-        for (Team team : Team.getActiveTeams()) {
-            if (team.getSize() == BattleShips.getSettingsConfig().getTeamSize())
-                continue; //team is full
+	private Team getLeastPopulatedTeam() {
+		Team leastPopulated = null;
+		int leastPopulatedSize = 69;
 
-            if (team.getSize() != 0 && team.getSize() < leastPopulatedSize) { //team is not empty and has least members
-                leastPopulatedSize = team.getSize();
-                leastPopulated = team;
-            }
+		for (Team team : Team.getActiveTeams()) {
+			if (team.getSize() == BattleShips.getSettingsConfig().getTeamSize())
+				continue; //team is full
 
-        }
+			if (team.getSize() != 0 && team.getSize() < leastPopulatedSize) { //team is not empty and has least members
+				leastPopulatedSize = team.getSize();
+				leastPopulated = team;
+			}
 
-        if (leastPopulated != null) return leastPopulated;
+		}
 
-        for (Team team : Team.getActiveTeams())
-            if (team.getSize() == 0)
-                return team;
+		if (leastPopulated != null) return leastPopulated;
 
-        return null;
-    }
+		for (Team team : Team.getActiveTeams())
+			if (team.getSize() == 0)
+				return team;
 
-    public Team getStolenBanner(Player player) {
-        return stolenBanners.get(player);
-    }
+		return null;
+	}
 
-    public void removeStolenBanner(Player player) {
-        stolenBanners.remove(player);
-    }
+	public Team getStolenBanner(Player player) {
+		return stolenBanners.get(player);
+	}
 
-    public boolean captureBanner(Player player, Team team) {
-        Team teamOfPlayer = playerTeam.get(player);
-        MessagesConfig msgs = BattleShips.getMessagesConfig();
-        if (currentGameState != GameState.INGAME || teamOfPlayer == null) {
-            return false;
-        }
+	public void removeStolenBanner(Player player) {
+		stolenBanners.remove(player);
+	}
 
-        if (stolenBanners.get(player) != null) {
-            player.sendMessage(msgs.get("error.alreadyHasBanner"));
-            return false;
-        }
+	public boolean captureBanner(Player player, Team team) {
+		Team teamOfPlayer = playerTeam.get(player.getUniqueId());
+		MessagesConfig msgs = BattleShips.getMessagesConfig();
+		if (currentGameState != GameState.INGAME || teamOfPlayer == null) {
+			return false;
+		}
 
-        stolenBanners.put(player, team);
-        team.removeCapturedBanner(team);
-        player.getInventory().setHelmet(new ItemStack(team.getBanner()));
-        updateBoards();
-        Bukkit.broadcastMessage(msgs.get("game.bannerStolen")
-                .replaceAll("%TEAM%", team.toString())
-                .replaceAll("%PLAYER%", teamOfPlayer.getColor() + player.getName()));
-        return true;
-    }
+		if (stolenBanners.get(player) != null) {
+			player.sendMessage(msgs.get("error.alreadyHasBanner"));
+			return false;
+		}
 
-    public void checkWin(Team team) {
-        if (team.getCapturedBanners() == playingTeams.size()) {
-            Bukkit.broadcastMessage(BattleShips.getMessagesConfig().get("game.teamWin").replaceAll("%TEAM%", team.toString()));
-            team.addWin();
-            changeGameState(GameState.RESTARTING);
-        }
-    }
+		stolenBanners.put(player, team);
+		team.removeCapturedBanner(team);
+		player.getInventory().setHelmet(new ItemStack(team.getBanner()));
+		updateBoards();
+		Bukkit.broadcastMessage(msgs.get("game.bannerStolen")
+				.replaceAll("%TEAM%", team.toString())
+				.replaceAll("%PLAYER%", teamOfPlayer.getColor() + player.getName()));
+		return true;
+	}
+
+	public void checkWin(Team team) {
+		if (team.getCapturedBanners() == playingTeams.size()) {
+			Bukkit.broadcastMessage(BattleShips.getMessagesConfig().get("game.teamWin").replaceAll("%TEAM%", team.toString()));
+			team.addWin();
+			changeGameState(GameState.RESTARTING);
+		}
+	}
 
 
-    public boolean checkWin() {
-        Team winnerTeam = null;
-        for (Team team : playingTeams) {
-            if (team.getSize() > 0) {
-                if (winnerTeam == null) {
-                    winnerTeam = team;
-                } else { //at least 2 teams left
-                    return false;
-                }
-            }
-        }
-        if (winnerTeam == null) { //should not happen
-            changeGameState(GameState.RESTARTING);
-            return true;
-        }
-        //only one team left
-        Bukkit.broadcastMessage(BattleShips.getMessagesConfig().get("game.teamWin").replaceAll("%TEAM%", winnerTeam.toString()));
-        winnerTeam.addWin();
-        changeGameState(GameState.RESTARTING);
-        return true;
-    }
+	public boolean checkWin() {
+		Team winnerTeam = null;
+		for (Team team : playingTeams) {
+			if (team.getSize() > 0) {
+				if (winnerTeam == null) {
+					winnerTeam = team;
+				} else { //at least 2 teams left
+					return false;
+				}
+			}
+		}
+		if (winnerTeam == null) { //should not happen
+			changeGameState(GameState.RESTARTING);
+			return true;
+		}
+		//only one team left
+		Bukkit.broadcastMessage(BattleShips.getMessagesConfig().get("game.teamWin").replaceAll("%TEAM%", winnerTeam.toString()));
+		winnerTeam.addWin();
+		changeGameState(GameState.RESTARTING);
+		return true;
+	}
 
-    public PlayerStats getStats(UUID uuid) {
-        return playerStats.get(uuid);
-    }
+	public void resetBanner(Player player) {
+		Team bannerOnHead = stolenBanners.get(player);
+		if (bannerOnHead == null) return;
 
-    public void setStats(UUID uuid, PlayerStats stats) {
-        playerStats.put(uuid, stats);
-    }
+		bannerOnHead.resetBanner();
+		bannerOnHead.addCapturedBanner(bannerOnHead);
+		checkWin(bannerOnHead);
+		stolenBanners.remove(player);
+		Bukkit.broadcastMessage(BattleShips.getMessagesConfig().get("game.bannerReturned").replaceAll("%TEAM%", bannerOnHead.toString()));
+	}
 
-    public void saveStats() {
-        playerStats.forEach((player, stats) -> BattleShips.getMySQL().savePlayerStats(player, stats));
-    }
+	public PlayerStats getStats(UUID uuid) {
+		return playerStats.get(uuid);
+	}
 
-    public void saveStats(UUID uuid) {
-        BattleShips.getMySQL().savePlayerStats(uuid, playerStats.get(uuid));
-        playerStats.remove(uuid); //remove player from playerStats cache otherwise dirty read could occur
-    }
+	public void setStats(UUID uuid, PlayerStats stats) {
+		playerStats.put(uuid, stats);
+	}
 
-    public FastBoard getSideBoard(Player player) {
-        return sideBoards.get(player);
-    }
+	public void saveStats() {
+		playerStats.forEach((player, stats) -> BattleShips.getMySQL().savePlayerStats(player, stats));
+	}
 
-    public void setSideBoard(Player player, FastBoard fastBoard) {
-        sideBoards.put(player, fastBoard);
-    }
+	public void saveStats(UUID uuid) {
+		if (playerStats.get(uuid) == null) return;
 
-    public void updateBoards() {
-        ArrayList<String> lines = new ArrayList<>();
-        playingTeams.forEach(team -> lines.add(team.getSideBoardText(playingTeams.size())));
+		BattleShips.getMySQL().savePlayerStats(uuid, playerStats.get(uuid));
+		playerStats.remove(uuid); //remove player from playerStats cache otherwise dirty read could occur
+	}
 
-        sideBoards.forEach((player, sideBoard) -> sideBoard.updateLines(lines));
-    }
+	public void setSideBoard(Player player, FastBoard fastBoard) {
+		sideBoards.put(player, fastBoard);
+	}
+
+	public void removeSideBoard(Player player) {
+		sideBoards.get(player).delete();
+		sideBoards.remove(player);
+	}
+
+	public void updateBoards() {
+		sideBoards.forEach((player, sideboard) -> {
+			ArrayList<String> lines = new ArrayList<>();
+			playingTeams.forEach(team -> lines.add(team.getSideBoardText(playingTeams.size())));
+
+			Team team = playerTeam.get(player.getUniqueId());
+			if (team != null) {
+				lines.add("");
+				lines.add("TNT-Kanone:");
+				lines.add(String.valueOf(team.getTntGunCooldown()));
+			}
+			sideboard.updateLines(lines);
+		});
+	}
 }

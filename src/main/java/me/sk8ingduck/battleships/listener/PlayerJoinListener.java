@@ -63,12 +63,23 @@ public class PlayerJoinListener implements Listener {
         }
 
         FastBoard fastBoard = new FastBoard(player);
-        fastBoard.updateTitle("§bChill§9Sucht §7| §9BattleShips");
+        fastBoard.updateTitle(msgsConfig.get("sideboard.title"));
+        int lineCount = 0;
+        for (String line : msgsConfig.getSideboardLines()) {
+            fastBoard.updateLine(lineCount++, line
+                    .replaceAll("&", "§")
+                    .replaceAll("%MAP%", config.getMapName())
+                    .replaceAll("%TEAM_COUNT%", String.valueOf(config.getTeamCount()))
+                    .replaceAll("%TEAM_SIZE%", String.valueOf(config.getTeamSize())));
+        }
+
         game.setSideBoard(player, fastBoard);
 
         if (game.getStats(player.getUniqueId()) == null) {
             PlayerStats stats = BattleShips.getMySQL().getPlayerStats(player.getUniqueId());
-            if (stats == null) stats = new PlayerStats(0, 0, 0, 0, 0, 0);
+            if (stats == null)
+                stats = new PlayerStats(player.getUniqueId(), 0, 0, 0, 0, 0, 0, 0);
+
             game.setStats(player.getUniqueId(), stats);
         }
 
@@ -99,6 +110,5 @@ public class PlayerJoinListener implements Listener {
             player.teleport(config.getLobbySpawn());
 
         event.setJoinMessage(msgsConfig.get("player.joinMessage").replaceAll("%PLAYER%", player.getName()));
-
     }
 }

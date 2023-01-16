@@ -49,6 +49,11 @@ public class GameStateChangeListener implements Listener {
         }
 
         if (event.getPreviousGameState() == GameState.WARMUP && event.getNewGameState() == GameState.INGAME) {
+            Bukkit.broadcastMessage(BattleShips.getMessagesConfig().get("game.start"));
+            Bukkit.getOnlinePlayers().forEach(player -> {
+                player.setHealth(20);
+                player.setFireTicks(0);
+            });
         }
 
         if (event.getPreviousGameState() == GameState.INGAME && event.getNewGameState() == GameState.RESTARTING) {

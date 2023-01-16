@@ -1,11 +1,14 @@
 package me.sk8ingduck.battleships.config;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 public class MessagesConfig extends Config {
 
     private final HashMap<String, String> msgs;
+    private final ArrayList<String> sideboardLines;
 
     public MessagesConfig(String name, File path) {
         super(name, path);
@@ -19,6 +22,7 @@ public class MessagesConfig extends Config {
         msgs.put("player.leaveTeam", "&eDu hast Team %TEAM% &everlassen.");
         msgs.put("player.stats", """
                 &e---------- &7Stats von %PLAYER% &e----------
+                &7> Rank: &e#%RANK%
                 &7> Kills: &e%KILLS%
                 &7> Deaths: &e%DEATHS%
                 &7> K/D: &e%KILLS_DEATHS_RATIO%
@@ -29,10 +33,12 @@ public class MessagesConfig extends Config {
                 &7> Eroberte Banner: &e%CAPTURED_BANNERS%
                 &e---------- &7Stats von %PLAYER% &e----------""");
 
+        msgs.put("game.start", "&6Die Aufwärmphase ist nun vorbei!");
         msgs.put("game.bannerCaptured", "&eDer Banner von Team %TEAM% &ewurde in die Base von Team %CAPTURE_TEAM% &egebracht.");
         msgs.put("game.bannerStolen", "&eDer Banner von Team %TEAM% &ewurde von %PLAYER% &egenommen");
         msgs.put("game.bannerReturned", "&eDer Banner von Team %TEAM% &ewurde zurückgebracht.");
         msgs.put("game.teamWin", "&aTeam %TEAM% &ahat das Spiel gewonnen!");
+        msgs.put("game.nobodyWon", "&cDas Spiel ist vorbei! Niemand hat gewonnen.");
 
         msgs.put("countdown.lobby", "&aDas Spiel startet in &6%SECONDS% &aSekunden.");
         msgs.put("countdown.warmup", "&aDie Runde startet in &6%SECONDS% &aSekunden.");
@@ -43,12 +49,28 @@ public class MessagesConfig extends Config {
         msgs.put("error.teamFull", "&cTeam %TEAM% &cist bereits voll.");
         msgs.put("error.alreadyHasBanner", "&cDu hast bereits einen Banner. Bringe diesen erst in deine Base zurück.");
         msgs.put("error.notEnoughEmeralds", "&cDu hast nicht genug Emeralds.");
+        msgs.put("error.playerNotFound", "&cSpieler wurde nicht gefunden.");
+
+        msgs.put("sideboard.title", " §7» &3BattleShips &7« ");
 
         msgs.forEach((msgPath, message) -> msgs.put(msgPath, (String) getPathOrSet(msgPath, message)));
+
+        ArrayList<String> test = new ArrayList<>(Arrays.asList(
+                " ",
+                "&eMap:",
+                "&6%MAP%",
+                "",
+                "&eModus:",
+                "&6%TEAM_COUNT%&7x&6%TEAM_SIZE%",
+                " "));
+
+        sideboardLines = (ArrayList<String>) getPathOrSet("sideboard.lines", test);
     }
 
     public String get(String path) {
         return msgs.get(path);
     }
-
+    public ArrayList<String> getSideboardLines() {
+        return sideboardLines;
+    }
 }

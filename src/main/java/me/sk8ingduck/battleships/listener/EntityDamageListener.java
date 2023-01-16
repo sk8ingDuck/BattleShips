@@ -11,7 +11,7 @@ public class EntityDamageListener implements Listener {
 
     @EventHandler
     public void onEntityDamage(EntityDamageEvent event) {
-        if (!BattleShips.getGame().isIngame()) {
+        if (!BattleShips.getGame().isIngame() || BattleShips.getGame().getCurrentGameState() == GameState.WARMUP) {
             event.setCancelled(true);
         }
     }

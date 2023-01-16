@@ -1,7 +1,6 @@
 package me.sk8ingduck.battleships.listener;
 
 import me.sk8ingduck.battleships.BattleShips;
-import me.sk8ingduck.battleships.game.GameSession;
 import me.sk8ingduck.battleships.game.GameState;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -11,7 +10,7 @@ public class PlayerDropItemListener implements Listener {
 
     @EventHandler
     public void onPlayerDropItem(PlayerDropItemEvent event) {
-        if (!BattleShips.getGame().isIngame()) {
+        if (!BattleShips.getGame().isIngame() && BattleShips.getGame().getCurrentGameState() != GameState.WARMUP) {
             event.setCancelled(true);
         }
     }

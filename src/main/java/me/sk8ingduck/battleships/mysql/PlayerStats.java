@@ -1,23 +1,32 @@
 package me.sk8ingduck.battleships.mysql;
 
 import java.text.DecimalFormat;
+import java.util.UUID;
 
 public class PlayerStats {
 
+    private UUID uuid;
     private int kills;
     private int deaths;
     private int gamesPlayed;
     private int gamesWon;
     private int farmedEmeralds;
     private int capturedBanners;
+    private final int rank;
 
-    public PlayerStats(int kills, int deaths, int gamesPlayed, int gamesWon, int farmedEmeralds, int capturedBanners) {
+    public PlayerStats(UUID uuid, int kills, int deaths, int gamesPlayed, int gamesWon, int farmedEmeralds, int capturedBanners, int rank) {
+        this.uuid = uuid;
         this.kills = kills;
         this.deaths = deaths;
         this.gamesPlayed = gamesPlayed;
         this.gamesWon = gamesWon;
         this.farmedEmeralds = farmedEmeralds;
         this.capturedBanners = capturedBanners;
+        this.rank = rank;
+    }
+
+    public UUID getUuid() {
+        return uuid;
     }
 
     public int getKills() {
@@ -42,6 +51,10 @@ public class PlayerStats {
 
     public int getCapturedBanners() {
         return capturedBanners;
+    }
+
+    public int getRank() {
+        return rank;
     }
 
     public String getKD() {

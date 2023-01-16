@@ -5,8 +5,11 @@ import me.sk8ingduck.battleships.config.SettingsConfig;
 import me.sk8ingduck.battleships.game.GameSession;
 import me.sk8ingduck.battleships.game.GameState;
 import me.sk8ingduck.battleships.game.Team;
+import me.sk8ingduck.battleships.util.ItemBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -24,8 +27,10 @@ public class PlayerRespawnListener implements Listener {
         } else {
             Team playerTeam = game.getTeam(player);
             Bukkit.getScheduler().scheduleSyncDelayedTask(BattleShips.getInstance(),
-                    () -> playerTeam.teleportPlayer(player), 1);
+                    () -> playerTeam.teleportPlayer(player), 0);
             player.getActivePotionEffects().forEach(effect -> player.removePotionEffect(effect.getType()));
+
+            player.getInventory().addItem(new ItemBuilder(Material.STONE_PICKAXE).addEnchantment(Enchantment.DIG_SPEED, 3).build());
         }
     }
 }

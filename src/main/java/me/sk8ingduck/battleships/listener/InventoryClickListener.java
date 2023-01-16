@@ -13,7 +13,8 @@ public class InventoryClickListener implements Listener {
 
     @EventHandler (priority = EventPriority.HIGHEST)
     public void onInventoryClick(InventoryClickEvent event) {
-        if (!BattleShips.getGame().isIngame()) {
+        if (!BattleShips.getGame().isIngame()
+                || event.getWhoClicked().getInventory().getItemInMainHand().equals(BattleShips.getSettingsConfig().getTntGunItem())) {
             event.setCancelled(true);
         }
     }

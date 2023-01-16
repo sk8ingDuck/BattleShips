@@ -5,7 +5,6 @@ import de.nandi.chillsuchtapi.translation.TranslateAPI;
 import me.sk8ingduck.battleships.command.SetspawnCommand;
 import me.sk8ingduck.battleships.command.StartCommand;
 import me.sk8ingduck.battleships.command.StatsCommand;
-import me.sk8ingduck.battleships.config.DBConfig;
 import me.sk8ingduck.battleships.config.MessagesConfig;
 import me.sk8ingduck.battleships.config.SettingsConfig;
 import me.sk8ingduck.battleships.config.TeamConfig;
@@ -18,7 +17,6 @@ import org.bukkit.GameRule;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Scoreboard;
 import org.ipvp.canvas.MenuFunctionListener;
 
@@ -67,7 +65,6 @@ public final class BattleShips extends JavaPlugin {
         this.getCommand("stats").setExecutor(new StatsCommand());
         this.getCommand("start").setExecutor(new StartCommand());
 
-        DBConfig dbConfig = new DBConfig("database.yml", getDataFolder());
         teamConfig = new TeamConfig("teams.yml", getDataFolder());
         settingsConfig = new SettingsConfig("settings.yml", getDataFolder());
         messagesConfig = new MessagesConfig("messages.yml", getDataFolder());

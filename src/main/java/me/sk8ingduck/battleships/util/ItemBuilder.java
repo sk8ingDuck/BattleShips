@@ -5,6 +5,8 @@ import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.CrossbowMeta;
+import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffect;
@@ -65,6 +67,22 @@ public class ItemBuilder {
         itemMeta.addEnchant(Enchantment.ARROW_DAMAGE, 5, false);
         itemMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         itemMeta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+        return this;
+    }
+
+    public ItemBuilder setDamage(int damage) {
+        if (itemMeta instanceof Damageable) {
+            Damageable damageMeta = (Damageable) itemMeta;
+            damageMeta.setDamage(damage);
+        }
+        return this;
+    }
+
+    public ItemBuilder setCrossBowCharged() {
+        if (itemMeta instanceof CrossbowMeta) {
+            CrossbowMeta crossbowMeta = (CrossbowMeta) itemMeta;
+            crossbowMeta.addChargedProjectile(new ItemStack(Material.ARROW, 1));
+        }
         return this;
     }
 
