@@ -12,13 +12,13 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.UUID;
 
 public class GameSession {
 
 	private GameState currentGameState;
-
 
 	//stores the teams which have at least 1 player at game start time
 	private final ArrayList<Team> playingTeams;
@@ -243,15 +243,24 @@ public class GameSession {
 
 			Team team = playerTeam.get(player.getUniqueId());
 			if (team != null) {
-				lines.add("");
-				lines.add("TNT-Kanone:");
-				lines.add(String.valueOf(team.getTntGunCooldown()));
+				Collections.addAll(lines, team.getTNTGunText());
 			}
 			sideboard.updateLines(lines);
 		});
 	}
 
+	public void updateBoards(Team team) {
+		ArrayList<String> lines = new ArrayList<>();
+		playingTeams.forEach(otherTeam -> lines.add(otherTeam.getSideBoardText(playingTeams.size())));
+		team.getMembers().forEach(player -> {
+			Collections.addAll(lines, team.getTNTGunText());
+			sideBoards.get(player).updateLines(lines);
+		});
+	}
+
 	public void setSpectator(Player player) {
+		player.setPlayerListName("§7" + player.getName());
+
 		player.teleport(BattleShips.getSettingsConfig().getSpectatorSpawn());
 		player.getInventory().clear();
 		player.setAllowFlight(true);

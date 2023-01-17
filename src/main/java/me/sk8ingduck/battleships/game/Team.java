@@ -1,6 +1,5 @@
 package me.sk8ingduck.battleships.game;
 
-import de.nandi.chillsuchtapi.api.ChillsuchtAPI;
 import me.sk8ingduck.battleships.BattleShips;
 import me.sk8ingduck.battleships.config.TeamConfig;
 import me.sk8ingduck.battleships.util.ItemBuilder;
@@ -56,8 +55,7 @@ public enum Team {
         this.banner = (ItemStack) teamConfig.getPathOrSet("team." + name() + ".bannerItem", defaultBannerItem);
         this.teamChooseItem = (ItemStack) teamConfig.getPathOrSet("team." + name() + ".teamChooseItem", defaultTeamChooseItem);
         this.members = new ArrayList<>();
-        this.tntGunLevel = 1;
-        setTntGunCooldown(10);
+        this.tntGunLevel = 0;
         capturedBanners = new ArrayList<>();
         capturedBanners.add(this);
 
@@ -199,8 +197,10 @@ public enum Team {
     public void setTntGunCooldown(int tntGunCooldown) {
         this.tntGunCooldown = tntGunCooldown;
 
+        GameSession game = BattleShips.getGame();
         cooldown = Bukkit.getScheduler().runTaskTimer(BattleShips.getInstance(), () -> {
             this.tntGunCooldown--;
+            game.updateBoards(this);
             if (this.tntGunCooldown == 0) cooldown.cancel();
         }, 0, 20);
     }
@@ -260,8 +260,13 @@ public enum Team {
         return (capturedBanners.contains(this) ? "§a✓" : "§4✗") + " " + this + " §7(" + capturedBanners.size() + "/" + playingTeams + ")";
     }
 
+    public String[] getTNTGunText() {
+        return new String[] {"", "§bTNT-Gun §7(Level: " + tntGunLevel + ")",
+                ((tntGunLevel == 0) ? "§cnicht bereit" : (tntGunCooldown == 0) ? "§abereit" : "§c" + tntGunCooldown)};
+    }
     @Override
     public String toString() {
         return color + name + "§r";
     }
+
 }

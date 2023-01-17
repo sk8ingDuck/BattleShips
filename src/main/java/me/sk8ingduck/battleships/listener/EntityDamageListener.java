@@ -13,7 +13,6 @@ public class EntityDamageListener implements Listener {
 	@EventHandler
 	public void onEntityDamage(EntityDamageEvent event) {
 		GameSession game = BattleShips.getGame();
-
 		if (event.getEntity() instanceof Player) {
 			Player player = (Player) event.getEntity();
 			if (!game.isIngame()
@@ -21,6 +20,11 @@ public class EntityDamageListener implements Listener {
 					|| game.getTeam(player) == null) {
 				event.setCancelled(true);
 			}
+		}
+
+		if (event.getCause() == EntityDamageEvent.DamageCause.ENTITY_EXPLOSION) {
+
+			event.setDamage(event.getDamage() / 3);
 		}
 	}
 }

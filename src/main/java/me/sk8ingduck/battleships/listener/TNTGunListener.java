@@ -4,15 +4,16 @@ import me.sk8ingduck.battleships.BattleShips;
 import me.sk8ingduck.battleships.game.GameSession;
 import me.sk8ingduck.battleships.game.Team;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityShootBowEvent;
-import org.bukkit.event.entity.ExplosionPrimeEvent;
+import org.bukkit.event.block.BlockExplodeEvent;
+import org.bukkit.event.entity.*;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -62,14 +63,16 @@ public class TNTGunListener implements Listener {
 			if (event.getEntity() instanceof Player) {
 				Player player = (Player) event.getEntity();
 				Team team = BattleShips.getGame().getTeam(player);
-				if (team == null) return;
+				if (team == null || team.getTntGunLevel() == 0) return;
 
-				TNTPrimed tnt = player.getWorld().spawn(event.getProjectile().getLocation(), TNTPrimed.class);
+				TNTPrimed tnt = (TNTPrimed) player.getWorld().spawnEntity(event.getProjectile().getLocation(), EntityType.PRIMED_TNT);
+
 				tnt.setVelocity(event.getProjectile().getVelocity());
 				tnt.setIsIncendiary(false);
+				tnt.setSource(event.getEntity());
 				tnt.setTicksLived(5);
 				tnt.setFuseTicks(100);
-				tnt.setCustomName(String.valueOf(team.getTntGunLevel() * 2));
+				tnt.setYield(team.getTntGunLevel() * 2);
 
 				event.setCancelled(true);
 				Bukkit.getScheduler().scheduleSyncDelayedTask(BattleShips.getInstance(), () -> {
@@ -98,16 +101,16 @@ public class TNTGunListener implements Listener {
 		}
 	}
 
-	@EventHandler
-	public void onExplosionPrime(ExplosionPrimeEvent event) {
-		if (event.getEntity() instanceof TNTPrimed tnt) {
-			event.setCancelled(true);
-			Location location = event.getEntity().getLocation();
-			if (tnt.getCustomName() != null) {
-				int power = Integer.parseInt(tnt.getCustomName());
-				location.getWorld().createExplosion(location.getX(), location.getY(), location.getZ(), power, false, false);
-			}
-
-		}
+	@EventHandler (priority = EventPriority.LOWEST)
+	public void onEntityExplode(EntityExplodeEvent event) {
+		event.blockList().clear();
 	}
+
+
+	@EventHandler (priority = EventPriority.LOWEST)
+	public void onBlockExplode(BlockExplodeEvent event) {
+		event.blockList().clear();
+	}
+
+
 }
