@@ -28,7 +28,7 @@ public class StatsCommand implements CommandExecutor {
 			}
 			Player player = (Player) sender;
 			PlayerStats stats = game.getStats(player.getUniqueId());
-			sendFormattetStats(player, stats, player.getName());
+			player.sendMessage(stats.replace(BattleShips.getMessagesConfig().get("player.stats"), player.getName()));
 			return true;
 		}
 
@@ -40,7 +40,9 @@ public class StatsCommand implements CommandExecutor {
 				sender.sendMessage(msgs.get("error.playerNotFound"));
 				return true;
 			}
-			sendFormattetStats(sender, stats, ChillsuchtAPI.getGeneralAPI().getNameFromUUID(stats.getUuid()));
+
+			sender.sendMessage(stats.replace(BattleShips.getMessagesConfig().get("player.stats"),
+					ChillsuchtAPI.getGeneralAPI().getNameFromUUID(stats.getUuid())));
 			return true;
 		}
 
@@ -56,22 +58,8 @@ public class StatsCommand implements CommandExecutor {
 			return true;
 		}
 
-		sendFormattetStats(sender, stats, playerName);
+		sender.sendMessage(stats.replace(BattleShips.getMessagesConfig().get("player.stats"), playerName));
 		return true;
-	}
-
-	private void sendFormattetStats(CommandSender player, PlayerStats stats, String playerName) {
-		player.sendMessage(BattleShips.getMessagesConfig().get("player.stats")
-				.replaceAll("%PLAYER%", playerName)
-				.replaceAll("%RANK%", String.valueOf(stats.getRank()))
-				.replaceAll("%KILLS%", String.valueOf(stats.getKills()))
-				.replaceAll("%DEATHS%", String.valueOf(stats.getDeaths()))
-				.replaceAll("%KILLS_DEATHS_RATIO%", stats.getKD())
-				.replaceAll("%GAMES_PLAYED%", String.valueOf(stats.getGamesPlayed()))
-				.replaceAll("%GAMES_WON%", String.valueOf(stats.getGamesWon()))
-				.replaceAll("%WIN_LOSS_RATIO%", stats.getWL())
-				.replaceAll("%FARMED_EMERALDS%", String.valueOf(stats.getFarmedEmeralds()))
-				.replaceAll("%CAPTURED_BANNERS%", String.valueOf(stats.getCapturedBanners())));
 	}
 
 }

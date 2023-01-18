@@ -10,10 +10,12 @@ import me.sk8ingduck.battleships.config.SettingsConfig;
 import me.sk8ingduck.battleships.config.TeamConfig;
 import me.sk8ingduck.battleships.game.GameSession;
 import me.sk8ingduck.battleships.mysql.MySQL;
+import me.sk8ingduck.battleships.util.LeaderboardSign;
 import me.sk8ingduck.battleships.util.TranslateFile;
 import me.sk8ingduck.battleships.villagershop.GuiManager;
 import org.bukkit.Bukkit;
 import org.bukkit.GameRule;
+import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -61,15 +63,18 @@ public final class BattleShips extends JavaPlugin {
             e.printStackTrace();
         }
         pluginManager.registerEvents(new MenuFunctionListener(), this);
+        ConfigurationSerialization.registerClass(LeaderboardSign.class);
+
         this.getCommand("setspawn").setExecutor(new SetspawnCommand());
         this.getCommand("stats").setExecutor(new StatsCommand());
         this.getCommand("start").setExecutor(new StartCommand());
+
+        mySQL = new MySQL();
 
         teamConfig = new TeamConfig("teams.yml", getDataFolder());
         settingsConfig = new SettingsConfig("settings.yml", getDataFolder());
         messagesConfig = new MessagesConfig("messages.yml", getDataFolder());
 
-        mySQL = new MySQL();
         game = new GameSession();
 
         GuiManager.init();
@@ -79,7 +84,8 @@ public final class BattleShips extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        game.saveStats();
+        if (game != null)
+            game.saveStats();
     }
 
     public static BattleShips getInstance() {
