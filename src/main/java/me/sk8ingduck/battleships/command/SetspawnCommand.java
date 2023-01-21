@@ -10,7 +10,12 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 
+import java.util.HashMap;
+
 public class SetspawnCommand implements CommandExecutor {
+
+    public static final HashMap<Player, Team> banner = new HashMap<>();
+    public static final HashMap<Player, Team> chest = new HashMap<>();
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -25,21 +30,21 @@ public class SetspawnCommand implements CommandExecutor {
         if (args.length != 1 && args.length != 2) {
             sender.sendMessage("Mögliche Befehle:");
             sender.sendMessage("/setspawn <Team>");
-            sender.sendMessage("/setspawn <Team> <banner | bannerChest | tntgun>");
+            sender.sendMessage("/setspawn <Team> <banner | chest | tntgun>");
             sender.sendMessage("/setspawn <lobby | spectator | shop>");
             return true;
         }
 
         if (args.length == 2) {
             String teamName = args[0];
-            Team team = Team.valueOf(teamName.toUpperCase());
+            Team team = BattleShips.getTeamConfig().getTeamByName(teamName);
             if (args[1].equalsIgnoreCase("banner")) {
-                BattleShips.getTeamConfig().setBannerLocation(team, player.getLocation());
-                sender.sendMessage("Banner Location von Team " + team + " gesetzt.");
+                sender.sendMessage("§ePlatziere nun den Banner von Team " + team);
+                banner.put(player, team);
                 return true;
-            } else if (args[1].equalsIgnoreCase("bannerchest")) {
-                BattleShips.getTeamConfig().setChestLocation(team, player.getLocation());
-                sender.sendMessage("Chest Location von Team " + team + " gesetzt.");
+            } else if (args[1].equalsIgnoreCase("chest")) {
+                sender.sendMessage("§ePlatziere nun die Kiste von Team " + team);
+                chest.put(player, team);
                 return true;
             } else if (args[1].equalsIgnoreCase("tntgun")) {
                 BattleShips.getTeamConfig().setTntGunLocation(team, player.getLocation()
@@ -73,12 +78,11 @@ public class SetspawnCommand implements CommandExecutor {
 
 
         String teamName = args[0];
-        Team team = Team.valueOf(teamName.toUpperCase());
+        Team team = BattleShips.getTeamConfig().getTeamByName(teamName);
 
-        BattleShips.getInstance().getTeamConfig().setSpawnLocation(team, player.getLocation());
+        BattleShips.getTeamConfig().setSpawnLocation(team, player.getLocation());
         sender.sendMessage("Spawn Location von Team " + team + " gesetzt.");
         return true;
     }
-
 
 }

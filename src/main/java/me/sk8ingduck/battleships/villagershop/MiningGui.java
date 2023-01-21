@@ -3,7 +3,6 @@ package me.sk8ingduck.battleships.villagershop;
 import me.sk8ingduck.battleships.util.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.inventory.ItemStack;
 import org.ipvp.canvas.mask.Mask;
 import org.ipvp.canvas.mask.RecipeMask;
 import org.ipvp.canvas.slot.Slot;
@@ -29,14 +28,14 @@ public class MiningGui extends Gui {
         Slot diamondPickaxe = gui.getSlot(16);
 
         stonePickaxe.setItem(new ItemBuilder(Material.STONE_PICKAXE).addEnchantment(Enchantment.DIG_SPEED, 3).setLores("", "§6Kosten§7: §a10 Emeralds").build());
-        ironPickaxe.setItem(new ItemBuilder(Material.IRON_PICKAXE).setLores("", "§6Kosten§7: §a15 Emeralds").build());
-        goldPickaxe.setItem(new ItemBuilder(Material.GOLDEN_PICKAXE).setLores("", "§6Kosten§7: §a20 Emeralds").build());
-        diamondPickaxe.setItem(new ItemBuilder(Material.DIAMOND_PICKAXE).setLores("", "§6Kosten§7: §a25 Emeralds").build());
+        ironPickaxe.setItem(new ItemBuilder(Material.IRON_PICKAXE).addEnchantment(Enchantment.DIG_SPEED, 3).setLores("", "§6Kosten§7: §a15 Emeralds").build());
+        goldPickaxe.setItem(new ItemBuilder(Material.GOLDEN_PICKAXE).addEnchantment(Enchantment.DIG_SPEED, 3).setLores("", "§6Kosten§7: §a20 Emeralds").build());
+        diamondPickaxe.setItem(new ItemBuilder(Material.DIAMOND_PICKAXE).addEnchantment(Enchantment.DIG_SPEED, 3).setLores("", "§6Kosten§7: §a25 Emeralds").build());
 
         stonePickaxe.setClickHandler((player, clickInformation) -> buy(player, new ItemBuilder(Material.STONE_PICKAXE).addEnchantment(Enchantment.DIG_SPEED, 3).build(), 10));
-        ironPickaxe.setClickHandler((player, clickInformation) -> buy(player, new ItemStack(Material.IRON_PICKAXE, 1), 15));
-        goldPickaxe.setClickHandler((player, clickInformation) -> buy(player, new ItemStack(Material.GOLDEN_PICKAXE, 1), 20));
-        diamondPickaxe.setClickHandler((player, clickInformation) -> buy(player, new ItemStack(Material.DIAMOND_PICKAXE, 1), 25));
+        ironPickaxe.setClickHandler((player, clickInformation) -> buy(player, new ItemBuilder(Material.IRON_PICKAXE, 1).addEnchantment(Enchantment.DIG_SPEED, 3).build(), 15));
+        goldPickaxe.setClickHandler((player, clickInformation) -> buy(player, new ItemBuilder(Material.GOLDEN_PICKAXE, 1).addEnchantment(Enchantment.DIG_SPEED, 3).build(), 20));
+        diamondPickaxe.setClickHandler((player, clickInformation) -> buy(player, new ItemBuilder(Material.DIAMOND_PICKAXE, 1).addEnchantment(Enchantment.DIG_SPEED, 3).build(), 25));
 
     }
 

@@ -16,18 +16,15 @@ public class AsyncPlayerChatListener implements Listener {
 		GameSession game = BattleShips.getGame();
 		Player player = event.getPlayer();
 
-		if (game.isIngame()) {
-			Team team = game.getTeam(player);
-			if (team == null) {
-				event.setCancelled(true);
-				Bukkit.getOnlinePlayers().stream().filter(otherPlayer -> game.getTeam(otherPlayer) == null)
-						.forEach(otherPlayer -> otherPlayer.sendMessage("§7" + player.getDisplayName() + ": §r" + event.getMessage()));
-			} else {
-
-				event.setFormat("§7[" + team  + "§7] " + team.getColor() + player.getName() + "§7: §r" + event.getMessage());
-			}
-		} else {
-			event.setFormat(player.getDisplayName() + " §7: §r" + event.getMessage());
+		Team team = game.getTeam(player);
+		if (game.isIngame() && team == null) {
+			event.setCancelled(true);
+			Bukkit.getOnlinePlayers().stream().filter(otherPlayer -> game.getTeam(otherPlayer) == null)
+					.forEach(otherPlayer -> otherPlayer.sendMessage("§7" + player.getDisplayName() + " §7» §r" + event.getMessage()));
+			return;
 		}
+
+		event.setFormat((team == null ? player.getDisplayName()
+				: "§7[" + team  + "§7] " + team.getColor() + player.getName()) + " §7» §r" + event.getMessage());
 	}
 }

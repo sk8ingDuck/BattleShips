@@ -1,10 +1,8 @@
 package me.sk8ingduck.battleships.listener;
 
 import me.sk8ingduck.battleships.BattleShips;
-import me.sk8ingduck.battleships.config.MessagesConfig;
-import me.sk8ingduck.battleships.config.SettingsConfig;
+import me.sk8ingduck.battleships.config.TeamConfig;
 import me.sk8ingduck.battleships.game.GameSession;
-import me.sk8ingduck.battleships.game.GameState;
 import me.sk8ingduck.battleships.game.Team;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -60,7 +58,7 @@ public class PlayerInteractListener implements Listener {
             Block block = event.getClickedBlock();
             if (block != null && block.getType().equals(Material.CHEST)) {
                 for (Team chestTeam : game.getPlayingTeams()) {
-                    if (!chestTeam.getChestLocation().getBlock().equals(block)) continue;
+                    if (!chestTeam.getChest().getLocation().getBlock().equals(block)) continue;
 
                     event.setCancelled(true);
 
@@ -79,7 +77,7 @@ public class PlayerInteractListener implements Listener {
                         game.removeStolenBanner(player);
                         player.getInventory().setHelmet(null);
                         if (chestTeam.equals(bannerOnHead)) { //returned own banner
-                            chestTeam.resetBanner();
+                            chestTeam.getBanner().setBlock();
                             chestTeam.addCapturedBanner(chestTeam);
                         }
 
@@ -100,9 +98,9 @@ public class PlayerInteractListener implements Listener {
     private ChestMenu chooseTeamGui() {
         GameSession game = BattleShips.getGame();
         ChestMenu gui = ChestMenu.builder(1).title("Team auswählen").build();
-
-        for (int i = 0; i < BattleShips.getSettingsConfig().getTeamCount(); i++) {
-            Team team = Team.getActiveTeams()[i];
+        TeamConfig teamConfig = BattleShips.getTeamConfig();
+        for (int i = 0; i < teamConfig.getTeamCount(); i++) {
+            Team team = teamConfig.getActiveTeams().get(i);
 
             gui.getSlot(i).setItemTemplate(team::getTeamChooseItem);
             gui.getSlot(i).setClickHandler((player, clickInformation) -> {
@@ -113,7 +111,7 @@ public class PlayerInteractListener implements Listener {
                     gui.close();
                     return;
                 }
-                if (team.getSize() == BattleShips.getSettingsConfig().getTeamSize()) {
+                if (team.getSize() == teamConfig.getTeamSize()) {
 
                     player.sendMessage(BattleShips.getMessagesConfig().get("error.teamFull").replaceAll("%TEAM%", team.toString()));
                     return;

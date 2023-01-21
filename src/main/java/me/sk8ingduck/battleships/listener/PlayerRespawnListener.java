@@ -1,13 +1,10 @@
 package me.sk8ingduck.battleships.listener;
 
 import me.sk8ingduck.battleships.BattleShips;
-import me.sk8ingduck.battleships.config.SettingsConfig;
 import me.sk8ingduck.battleships.game.GameSession;
-import me.sk8ingduck.battleships.game.GameState;
 import me.sk8ingduck.battleships.game.Team;
 import me.sk8ingduck.battleships.util.ItemBuilder;
 import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;

@@ -4,7 +4,6 @@ import me.sk8ingduck.battleships.BattleShips;
 import me.sk8ingduck.battleships.config.MessagesConfig;
 import me.sk8ingduck.battleships.game.GameSession;
 import me.sk8ingduck.battleships.game.Team;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;

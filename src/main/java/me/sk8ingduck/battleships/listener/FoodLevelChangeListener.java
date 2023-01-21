@@ -16,6 +16,7 @@ public class FoodLevelChangeListener implements Listener {
         if (!game.isIngame()) {
             event.setCancelled(true);
         }
+
         if (event.getEntity() instanceof Player player && game.getTeam(player) == null) {
             event.setCancelled(true);
         }

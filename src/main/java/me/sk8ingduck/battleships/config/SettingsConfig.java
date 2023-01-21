@@ -9,19 +9,17 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
 import org.bukkit.block.Skull;
 import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class SettingsConfig extends Config {
 
 	private final String mapName;
-	private final int teamCount;
-	private final int teamSize;
 	private final int neededPlayersToStart;
 	private final ItemStack teamChooserItem;
 	private final ItemStack tntGunItem;
@@ -34,8 +32,6 @@ public class SettingsConfig extends Config {
 	public SettingsConfig(String name, File path) {
 		super(name, path);
 		this.mapName = (String) getPathOrSet("mapName", "Penis");
-		this.teamCount = (int) getPathOrSet("teamCount", 8);
-		this.teamSize = (int) getPathOrSet("teamSize", 1);
 		this.neededPlayersToStart = (int) getPathOrSet("neededPlayersToStart", 4);
 		this.teamChooserItem = (ItemStack) getPathOrSet("teamChooserItem", new ItemBuilder(Material.CHEST).setDisplayName("Team auswählen").build());
 		this.tntGunItem = (ItemStack) getPathOrSet("tntGunItem", new ItemBuilder(Material.CROSSBOW).setGlowing()
@@ -43,7 +39,9 @@ public class SettingsConfig extends Config {
 		this.teleportItem = (ItemStack) getPathOrSet("teleportItem", new ItemBuilder(Material.COMPASS).setDisplayName("§5Teleporter").build());
 		this.lobbySpawn = (Location) getPathOrSet("lobbySpawn", null);
 		this.lobbySpawn = (Location) getPathOrSet("spectatorSpawn", null);
-		this.signLayout = (ArrayList<String>) getPathOrSet("signLayout", new String[] {"Platz #%RANK%", "%PLAYER%", "Gespielt: %GAMES_PLAYED%", "Gewonnen: %GAMES_WON%"});
+
+		ArrayList<String> defaultSignLayout = new ArrayList<>(Arrays.asList("Platz #%RANK%", "%PLAYER%", "Gespielt: %GAMES_PLAYED%", "Gewonnen: %GAMES_WON%"));
+		this.signLayout = (ArrayList<String>) getPathOrSet("signLayout", defaultSignLayout);
 		this.leaderboardSigns = (ArrayList<LeaderboardSign>) getPathOrSet("leaderboardSigns", new ArrayList<LeaderboardSign>());
 
 		leaderboardSigns.forEach(this::updateLeaderboardSign);
@@ -55,14 +53,6 @@ public class SettingsConfig extends Config {
 
 	public int getNeededPlayersToStart() {
 		return neededPlayersToStart;
-	}
-
-	public int getTeamCount() {
-		return teamCount;
-	}
-
-	public int getTeamSize() {
-		return teamSize;
 	}
 
 	public ItemStack getTeamChooserItem() {
@@ -106,23 +96,21 @@ public class SettingsConfig extends Config {
 	}
 
 	private void updateLeaderboardSign(LeaderboardSign leaderboardSign) {
-		Block block = leaderboardSign.getSignLocation().getBlock();
-		if (!(block.getState() instanceof Sign sign)) {
-			return;
-		}
-		PlayerStats playerStats = BattleShips.getMySQL().getPlayerStats(leaderboardSign.getRank());
-		if (playerStats == null) {
-            sign.setLine(0, "PLAYER NOT FOUND");
-			return;
-		}
-
+		Block signBlock = leaderboardSign.getSignLocation().getBlock();
 		Block skullBlock = leaderboardSign.getHeadLocation().getBlock();
-		BlockState state = skullBlock.getState();
-		Skull skull = (Skull) state;
-		skull.setOwningPlayer(Bukkit.getOfflinePlayer(playerStats.getUuid()));
-		skull.update();
+
+		PlayerStats playerStats = BattleShips.getMySQL().getPlayerStats(leaderboardSign.getRank());
+		if (!(signBlock.getState() instanceof Sign sign)
+				|| !(skullBlock.getState() instanceof Skull skull)
+				|| playerStats == null) {
+			leaderboardSigns.remove(leaderboardSign);
+			return;
+		}
 
 		String name = ChillsuchtAPI.getGeneralAPI().getNameFromUUID(playerStats.getUuid());
+
+		skull.setOwningPlayer(Bukkit.getOfflinePlayer(playerStats.getUuid()));
+		skull.update();
 
 		for (int i = 0; i < 4; i++)
 			sign.setLine(i, playerStats.replace(signLayout.get(i), name));

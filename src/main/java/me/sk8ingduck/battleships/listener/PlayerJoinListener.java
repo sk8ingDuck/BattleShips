@@ -4,6 +4,7 @@ import de.nandi.chillsuchtapi.api.ChillsuchtAPI;
 import me.sk8ingduck.battleships.BattleShips;
 import me.sk8ingduck.battleships.config.MessagesConfig;
 import me.sk8ingduck.battleships.config.SettingsConfig;
+import me.sk8ingduck.battleships.config.TeamConfig;
 import me.sk8ingduck.battleships.game.GameSession;
 import me.sk8ingduck.battleships.game.GameState;
 import me.sk8ingduck.battleships.mysql.PlayerStats;
@@ -26,6 +27,7 @@ public class PlayerJoinListener implements Listener {
 	public void onJoin(PlayerJoinEvent event) {
 		GameSession game = BattleShips.getGame();
 		SettingsConfig config = BattleShips.getSettingsConfig();
+		TeamConfig teamConfig = BattleShips.getTeamConfig();
 		MessagesConfig msgsConfig = BattleShips.getMessagesConfig();
 
 		Player player = event.getPlayer();
@@ -37,7 +39,7 @@ public class PlayerJoinListener implements Listener {
 			return;
 		}
 
-		if (Bukkit.getOnlinePlayers().size() > config.getTeamSize() * config.getTeamCount()) {
+		if (Bukkit.getOnlinePlayers().size() > teamConfig.getTeamSize() * teamConfig.getTeamCount()) {
 			if (!event.getPlayer().hasPermission("chillsucht.join.server")) {
 				event.getPlayer().sendMessage(ChillsuchtAPI.PREFIX +
 						"§cDie Runde ist voll. Hole dir §6Premium§c um vollen Runden beizutreten.");
@@ -68,8 +70,8 @@ public class PlayerJoinListener implements Listener {
 			fastBoard.updateLine(lineCount++, line
 					.replaceAll("&", "§")
 					.replaceAll("%MAP%", config.getMapName())
-					.replaceAll("%TEAM_COUNT%", String.valueOf(config.getTeamCount()))
-					.replaceAll("%TEAM_SIZE%", String.valueOf(config.getTeamSize())));
+					.replaceAll("%TEAM_COUNT%", String.valueOf(teamConfig.getTeamCount()))
+					.replaceAll("%TEAM_SIZE%", String.valueOf(teamConfig.getTeamSize())));
 		}
 
 		game.setSideBoard(player, fastBoard);

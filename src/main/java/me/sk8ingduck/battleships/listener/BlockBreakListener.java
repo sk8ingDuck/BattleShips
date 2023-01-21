@@ -2,7 +2,6 @@ package me.sk8ingduck.battleships.listener;
 
 import me.sk8ingduck.battleships.BattleShips;
 import me.sk8ingduck.battleships.game.GameSession;
-import me.sk8ingduck.battleships.game.GameState;
 import me.sk8ingduck.battleships.game.Team;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -38,10 +37,10 @@ public class BlockBreakListener implements Listener {
 
 		if (block.getState() instanceof Banner) {
 			for (Team team : game.getPlayingTeams()) {
-				if (block.getLocation().getBlockX() == team.getBannerLocation().getBlockX()
-						&& block.getLocation().getBlockY() == team.getBannerLocation().getBlockY()
-						&& block.getLocation().getBlockZ() == team.getBannerLocation().getBlockZ()
-						&& event.getBlock().getType().equals(team.getBanner().getType())) {
+				if (block.getLocation().getBlockX() == team.getBanner().getLocation().getBlockX()
+						&& block.getLocation().getBlockY() == team.getBanner().getLocation().getBlockY()
+						&& block.getLocation().getBlockZ() == team.getBanner().getLocation().getBlockZ()
+						&& event.getBlock().getType().equals(team.getBanner().getItem())) {
 					if (BattleShips.getGame().getTeam(player).equals(team)) {
 						event.setCancelled(true);
 					} else {
@@ -53,9 +52,9 @@ public class BlockBreakListener implements Listener {
 		}
 		if (block.getState() instanceof Chest) {
 			for (Team team : game.getPlayingTeams()) {
-				if (block.getLocation().getBlockX() == team.getChestLocation().getBlockX()
-						&& block.getLocation().getBlockY() == team.getChestLocation().getBlockY()
-						&& block.getLocation().getBlockZ() == team.getChestLocation().getBlockZ()) {
+				if (block.getLocation().getBlockX() == team.getChest().getLocation().getBlockX()
+						&& block.getLocation().getBlockY() == team.getChest().getLocation().getBlockY()
+						&& block.getLocation().getBlockZ() == team.getChest().getLocation().getBlockZ()) {
 					event.setCancelled(true);
 				}
 			}

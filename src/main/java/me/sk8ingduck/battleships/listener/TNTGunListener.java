@@ -65,6 +65,8 @@ public class TNTGunListener implements Listener {
 				Team team = BattleShips.getGame().getTeam(player);
 				if (team == null || team.getTntGunLevel() == 0) return;
 
+				event.setCancelled(true);
+
 				TNTPrimed tnt = (TNTPrimed) player.getWorld().spawnEntity(event.getProjectile().getLocation(), EntityType.PRIMED_TNT);
 
 				tnt.setVelocity(event.getProjectile().getVelocity());
@@ -74,7 +76,6 @@ public class TNTGunListener implements Listener {
 				tnt.setFuseTicks(100);
 				tnt.setYield(team.getTntGunLevel() * 2);
 
-				event.setCancelled(true);
 				Bukkit.getScheduler().scheduleSyncDelayedTask(BattleShips.getInstance(), () -> {
 					team.setTntGunCooldown(5);
 					if (bowCache.containsKey(player.getUniqueId())) {

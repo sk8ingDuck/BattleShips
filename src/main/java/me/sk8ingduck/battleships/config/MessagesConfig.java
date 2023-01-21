@@ -55,7 +55,7 @@ public class MessagesConfig extends Config {
 
         msgs.forEach((msgPath, message) -> msgs.put(msgPath, (String) getPathOrSet(msgPath, message)));
 
-        ArrayList<String> test = new ArrayList<>(Arrays.asList(
+        ArrayList<String> defaultSideboardLines = new ArrayList<>(Arrays.asList(
                 " ",
                 "&eMap:",
                 "&6%MAP%",
@@ -64,7 +64,7 @@ public class MessagesConfig extends Config {
                 "&6%TEAM_COUNT%&7x&6%TEAM_SIZE%",
                 " "));
 
-        sideboardLines = (ArrayList<String>) getPathOrSet("sideboard.lines", test);
+        sideboardLines = (ArrayList<String>) getPathOrSet("sideboard.lines", defaultSideboardLines);
     }
 
     public String get(String path) {

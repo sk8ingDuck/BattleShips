@@ -2,19 +2,15 @@ package me.sk8ingduck.battleships.game;
 
 import me.sk8ingduck.battleships.BattleShips;
 import me.sk8ingduck.battleships.config.MessagesConfig;
+import me.sk8ingduck.battleships.config.TeamConfig;
 import me.sk8ingduck.battleships.event.GameStateChangeEvent;
 import me.sk8ingduck.battleships.mysql.PlayerStats;
 import me.sk8ingduck.battleships.util.FastBoard;
-import me.sk8ingduck.battleships.util.ItemBuilder;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.UUID;
+import java.util.*;
 
 public class GameSession {
 
@@ -111,11 +107,13 @@ public class GameSession {
 	}
 
 	private Team getLeastPopulatedTeam() {
+		TeamConfig teamConfig = BattleShips.getTeamConfig();
+
 		Team leastPopulated = null;
 		int leastPopulatedSize = 69;
 
-		for (Team team : Team.getActiveTeams()) {
-			if (team.getSize() == BattleShips.getSettingsConfig().getTeamSize())
+		for (Team team : teamConfig.getActiveTeams()) {
+			if (team.getSize() == teamConfig.getTeamSize())
 				continue; //team is full
 
 			if (team.getSize() != 0 && team.getSize() < leastPopulatedSize) { //team is not empty and has least members
@@ -127,11 +125,7 @@ public class GameSession {
 
 		if (leastPopulated != null) return leastPopulated;
 
-		for (Team team : Team.getActiveTeams())
-			if (team.getSize() == 0)
-				return team;
-
-		return null;
+		return teamConfig.getActiveTeams().stream().filter(team -> team.getSize() == 0).findFirst().orElse(null);
 	}
 
 	public Team getStolenBanner(Player player) {
@@ -156,7 +150,7 @@ public class GameSession {
 
 		stolenBanners.put(player, team);
 		team.removeCapturedBanner(team);
-		player.getInventory().setHelmet(new ItemStack(team.getBanner()));
+		player.getInventory().setHelmet(new ItemStack(team.getBanner().getItem()));
 		updateBoards();
 		Bukkit.broadcastMessage(msgs.get("game.bannerStolen")
 				.replaceAll("%TEAM%", team.toString())
@@ -199,10 +193,11 @@ public class GameSession {
 		Team bannerOnHead = stolenBanners.get(player);
 		if (bannerOnHead == null) return;
 
-		bannerOnHead.resetBanner();
+		bannerOnHead.getBanner().setBlock();
 		bannerOnHead.addCapturedBanner(bannerOnHead);
 		checkWin(bannerOnHead);
 		stolenBanners.remove(player);
+		updateBoards();
 		Bukkit.broadcastMessage(BattleShips.getMessagesConfig().get("game.bannerReturned").replaceAll("%TEAM%", bannerOnHead.toString()));
 	}
 

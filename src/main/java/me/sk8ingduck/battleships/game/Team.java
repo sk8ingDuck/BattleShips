@@ -1,12 +1,11 @@
 package me.sk8ingduck.battleships.game;
 
 import me.sk8ingduck.battleships.BattleShips;
-import me.sk8ingduck.battleships.config.TeamConfig;
 import me.sk8ingduck.battleships.util.ItemBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
@@ -14,259 +13,243 @@ import org.ipvp.canvas.slot.Slot;
 import org.ipvp.canvas.type.ChestMenu;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public enum Team {
+public class Team implements ConfigurationSerializable {
 
-    RED("Rot", "RED", new ItemStack(Material.RED_BANNER), new ItemStack(Material.RED_WOOL)),
-    GREEN("Grün", "GREEN", new ItemStack(Material.GREEN_BANNER), new ItemStack(Material.GREEN_WOOL)),
-    BLUE("Blau", "BLUE", new ItemStack(Material.BLUE_BANNER), new ItemStack(Material.BLUE_WOOL)),
-    YELLOW("Gelb", "YELLOW", new ItemStack(Material.YELLOW_BANNER), new ItemStack(Material.YELLOW_WOOL)),
-    ORANGE("Orange", "GOLD", new ItemStack(Material.ORANGE_BANNER), new ItemStack(Material.ORANGE_WOOL)),
-    PURPLE("Lila", "LIGHT_PURPLE", new ItemStack(Material.PURPLE_BANNER), new ItemStack(Material.PURPLE_WOOL)),
-    GRAY("Grau", "GRAY", new ItemStack(Material.GRAY_BANNER), new ItemStack(Material.GRAY_WOOL)),
-    WHITE("Weiss", "WHITE", new ItemStack(Material.WHITE_BANNER), new ItemStack(Material.WHITE_WOOL));
+	private final String name;
+	private final ChatColor color;
+	private final ItemStack teamChooseItem;
+	private org.bukkit.scoreboard.Team scoreboardTeam;
+	private Location spawnLocation;
+	private Location tntGunLocation;
+	private TeamItem banner;
+	private TeamItem chest;
+	private ArrayList<Player> members;
+	private ArrayList<Team> capturedBanners;
+	private int tntGunLevel;
+	private int tntGunCooldown;
 
-    private org.bukkit.scoreboard.Team scoreboardTeam;
-    private final String name;
-    private final ChatColor color;
-    private Location spawnLocation;
-    private Location bannerLocation;
-    private Location chestLocation;
-    private Location tntGunLocation;
-    private final ItemStack banner;
-    private final ItemStack teamChooseItem;
-    private final ArrayList<Player> members;
-    private int tntGunLevel;
-    private int tntGunCooldown;
-    private final ArrayList<Team> capturedBanners;
+	private BukkitTask cooldown;
 
-    private BukkitTask cooldown;
+	public Team(String defaultName, ChatColor defaultColor, ItemStack defaultTeamChooseItem) {
+		name = defaultName;
+		color = defaultColor;
+		teamChooseItem = defaultTeamChooseItem;
+		initTeam();
+	}
 
-    Team(String defaultName, String defaultColor, ItemStack defaultBannerItem, ItemStack defaultTeamChooseItem) {
+	public Team(Map<String, Object> saveMap) {
+		name = (String) saveMap.get("name");
+		color = ChatColor.valueOf((String) saveMap.get("color"));
+		teamChooseItem = (ItemStack) saveMap.get("teamChooseItem");
+		spawnLocation = (Location) saveMap.get("spawnLocation");
+		tntGunLocation = (Location) saveMap.get("tntGunLocation");
+		banner = (TeamItem) saveMap.get("banner");
+		chest = (TeamItem) saveMap.get("chest");
+		initTeam();
+	}
 
-        TeamConfig teamConfig = BattleShips.getInstance().getTeamConfig();
-        this.name = (String) teamConfig.getPathOrSet("team." + name() + ".name", defaultName);
-        this.color = ChatColor.valueOf((String) teamConfig.getPathOrSet("team." + name() + ".color", defaultColor));
-        this.spawnLocation = (Location) teamConfig.getPathOrSet("team." + name() + ".spawnLocation", null);
-        this.bannerLocation = (Location) teamConfig.getPathOrSet("team." + name() + ".bannerLocation", null);
-        this.chestLocation = (Location) teamConfig.getPathOrSet("team." + name() + ".chestLocation", null);
-        this.tntGunLocation = (Location) teamConfig.getPathOrSet("team." + name() + ".tntGunLocation", null);
-        this.banner = (ItemStack) teamConfig.getPathOrSet("team." + name() + ".bannerItem", defaultBannerItem);
-        this.teamChooseItem = (ItemStack) teamConfig.getPathOrSet("team." + name() + ".teamChooseItem", defaultTeamChooseItem);
-        this.members = new ArrayList<>();
-        this.tntGunLevel = 0;
-        capturedBanners = new ArrayList<>();
-        capturedBanners.add(this);
+	@Override
+	public Map<String, Object> serialize() {
+		HashMap<String, Object> saveMap = new HashMap<>();
+		saveMap.put("name", name);
+		saveMap.put("color", color.name());
+		saveMap.put("teamChooseItem", teamChooseItem);
+		saveMap.put("spawnLocation", spawnLocation);
+		saveMap.put("tntGunLocation", tntGunLocation);
+		saveMap.put("banner", banner);
+		saveMap.put("chest", chest);
+		return saveMap;
+	}
 
-        scoreboardTeam = BattleShips.getScoreboard().getTeam("z" + name());
-        if (scoreboardTeam == null)
-            scoreboardTeam = BattleShips.getScoreboard().registerNewTeam("z" + name());
+	private void initTeam() {
+		if (banner != null)
+			banner.setBlock();
+		if (chest != null)
+			chest.setBlock();
 
-        scoreboardTeam.setColor(color);
-    }
+		members = new ArrayList<>();
+		capturedBanners = new ArrayList<>();
+		capturedBanners.add(this);
+		tntGunLevel = 0;
 
-    public String getName() {
-        return name;
-    }
+		scoreboardTeam = BattleShips.getScoreboard().getTeam("z" + name);
+		if (scoreboardTeam == null)
+			scoreboardTeam = BattleShips.getScoreboard().registerNewTeam("z" + name);
 
-    public ChatColor getColor() {
-        return color;
-    }
-
-    public void setSpawnLocation(Location location) {
-        spawnLocation = location;
-    }
-
-    public void teleportPlayers() {
-        members.forEach(member -> {
-            member.getInventory().clear();
-            member.setFireTicks(0);
-            member.setHealth(20);
-            member.setFoodLevel(20);
-            member.getActivePotionEffects().forEach(effect -> member.removePotionEffect(effect.getType()));
-            member.teleport(spawnLocation);
-        });
-    }
-
-    public void teleportPlayer(Player player) {
-        player.teleport(spawnLocation);
-    }
-
-    public void setBannerLocation(Location bannerLocation) {
-        if (this.bannerLocation != null) {
-            this.bannerLocation.getBlock().setType(Material.AIR);
-        }
-
-        this.bannerLocation = bannerLocation;
-
-        resetBanner();
-    }
-
-    public void resetBanner() {
-        if (bannerLocation != null)
-            bannerLocation.getBlock().setType(banner.getType());
-    }
-
-    public void removeBannerAndChest() {
-        if (bannerLocation != null)
-            bannerLocation.getBlock().setType(Material.AIR);
-        if (chestLocation != null)
-            chestLocation.getBlock().setType(Material.AIR);
-    }
-
-    public Location getBannerLocation() {
-        return bannerLocation;
-    }
+		scoreboardTeam.setColor(color);
+	}
 
 
-    public ItemStack getBanner() {
-        return banner;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public Location getChestLocation() {
-        return chestLocation;
-    }
+	public ChatColor getColor() {
+		return color;
+	}
 
-    public void setChestLocation(Location chestLocation) {
-        if (this.chestLocation != null) {
-            this.chestLocation.getBlock().setType(Material.AIR);
-        }
+	public void setSpawnLocation(Location location) {
+		spawnLocation = location;
+	}
 
-        this.chestLocation = chestLocation;
-        this.chestLocation.getBlock().setType(Material.CHEST);
-    }
+	public void teleportPlayers() {
+		members.forEach(member -> {
+			member.getInventory().clear();
+			member.setFireTicks(0);
+			member.setHealth(20);
+			member.setFoodLevel(20);
+			member.getActivePotionEffects().forEach(effect -> member.removePotionEffect(effect.getType()));
+			member.teleport(spawnLocation);
+		});
+	}
 
-    public Location getTntGunLocation() {
-        return tntGunLocation;
-    }
+	public void teleportPlayer(Player player) {
+		player.teleport(spawnLocation);
+	}
 
-    public void setTntGunLocation(Location tntGunLocation) {
-        this.tntGunLocation = tntGunLocation;
-    }
+	public Location getTntGunLocation() {
+		return tntGunLocation;
+	}
 
-    public ItemStack getTeamChooseItem(Player player) {
-        int maxTeamSize = BattleShips.getSettingsConfig().getTeamSize();
-        String prefix = maxTeamSize == members.size() ? "§4" : "§a";
-        String[] lores = new String[members.size()];
-        for (int i = 0; i < members.size(); i++) {
-            lores[i] = "§7- " + members.get(i).getName();
-        }
-        ItemBuilder item = new ItemBuilder(teamChooseItem)
-                .setDisplayName("§rTeam " + this + prefix + " (" + members.size() + "/" + maxTeamSize + ")")
-                .setLores(lores);
-        if (members.contains(player)) {
-            item.setGlowing();
-        }
+	public void setTntGunLocation(Location tntGunLocation) {
+		this.tntGunLocation = tntGunLocation;
+	}
 
-        return item.build();
-    }
+	public int getTntGunLevel() {
+		return tntGunLevel;
+	}
 
-    public void addMember(Player player) {
-        members.add(player);
-        //ChillsuchtAPI.getPermissionAPI().removeRank(player, BattleShips.getScoreboard());
-        scoreboardTeam.addEntry(player.getName());
-    }
+	public void increaseTntGunLevel() {
+		tntGunLevel++;
+	}
 
-    public void removeMember(Player player) {
-        members.remove(player);
-        scoreboardTeam.removeEntry(player.getName());
-        //ChillsuchtAPI.getPermissionAPI().setRank(player, BattleShips.getScoreboard());
-    }
+	public void setTntGunCooldown(int tntGunCooldown) {
+		this.tntGunCooldown = tntGunCooldown;
 
-    public int getSize() {
-        return members.size();
-    }
+		GameSession game = BattleShips.getGame();
+		cooldown = Bukkit.getScheduler().runTaskTimer(BattleShips.getInstance(), () -> {
+			this.tntGunCooldown--;
+			game.updateBoards(this);
+			if (this.tntGunCooldown == 0) cooldown.cancel();
+		}, 0, 20);
+	}
 
-    public ArrayList<Player> getMembers() {
-        return members;
-    }
+	public boolean isCooldownActive() {
+		return tntGunCooldown != 0;
+	}
 
-    public int getTntGunLevel() {
-        return tntGunLevel;
-    }
+	public TeamItem getBanner() {
+		return banner;
+	}
 
-    public void increaseTntGunLevel() {
-        tntGunLevel++;
-    }
+	public void setBanner(TeamItem banner) {
+		this.banner = banner;
+	}
 
-    public int getTntGunCooldown() {
-        return tntGunCooldown;
-    }
+	public TeamItem getChest() {
+		return chest;
+	}
 
-    public void setTntGunCooldown(int tntGunCooldown) {
-        this.tntGunCooldown = tntGunCooldown;
+	public void setChest(TeamItem chest) {
+		this.chest = chest;
+	}
 
-        GameSession game = BattleShips.getGame();
-        cooldown = Bukkit.getScheduler().runTaskTimer(BattleShips.getInstance(), () -> {
-            this.tntGunCooldown--;
-            game.updateBoards(this);
-            if (this.tntGunCooldown == 0) cooldown.cancel();
-        }, 0, 20);
-    }
+	public ItemStack getTeamChooseItem(Player player) {
+		int maxTeamSize = BattleShips.getTeamConfig().getTeamSize();
+		String prefix = maxTeamSize == members.size() ? "§4" : "§a";
+		String[] lores = new String[members.size()];
+		for (int i = 0; i < members.size(); i++) {
+			lores[i] = "§7- " + members.get(i).getName();
+		}
+		ItemBuilder item = new ItemBuilder(teamChooseItem)
+				.setDisplayName("§rTeam " + this + prefix + " (" + members.size() + "/" + maxTeamSize + ")")
+				.setLores(lores);
+		if (members.contains(player)) {
+			item.setGlowing();
+		}
 
-    public boolean isCooldownActive() {
-        return tntGunCooldown != 0;
-    }
+		return item.build();
+	}
 
-    public void addCapturedBanner(Team team) {
-        if (!capturedBanners.contains(team))
-            capturedBanners.add(team);
-    }
+	public void addMember(Player player) {
+		members.add(player);
+		player.setPlayerListName(color + name + " §7» " + color + player.getName());
+		//ChillsuchtAPI.getPermissionAPI().removeRank(player, BattleShips.getScoreboard());
+		scoreboardTeam.addEntry(player.getName());
+	}
 
-    public void removeCapturedBanner(Team team) {
-        capturedBanners.remove(team);
-    }
+	public void removeMember(Player player) {
+		members.remove(player);
+		scoreboardTeam.removeEntry(player.getName());
+		//ChillsuchtAPI.getPermissionAPI().setRank(player, BattleShips.getScoreboard());
+	}
 
-    public ChestMenu getCapturedBannersChest() {
-        ChestMenu gui = ChestMenu.builder(1).title("Eroberte Banner von " + this).build();
-        GameSession game = BattleShips.getGame();
-        AtomicInteger slot = new AtomicInteger();
-        capturedBanners.forEach(bannerTeam -> {
-            Slot guiSlot = gui.getSlot(slot.getAndIncrement());
-            guiSlot.setItem(new ItemBuilder(bannerTeam.getBanner()).setDisplayName("§fBanner von Team " + bannerTeam).build());
-            guiSlot.setClickHandler((player, clickInformation) -> {
-                if (!bannerTeam.equals(this) //player cant capture banner of team's chest
-                        && !game.getTeam(player).equals(this)  //player cant capture banners of own chest
-                        && game.captureBanner(player, bannerTeam)) { //cant capture banner for other reason
-                    this.removeCapturedBanner(bannerTeam);
-                    gui.close();
-                }
-            });
-        });
+	public int getSize() {
+		return members.size();
+	}
 
-        return gui;
-    }
+	public ArrayList<Player> getMembers() {
+		return members;
+	}
 
-    public int getCapturedBanners() {
-        return capturedBanners.size();
-    }
+	public void addCapturedBanner(Team team) {
+		if (!capturedBanners.contains(team))
+			capturedBanners.add(team);
+	}
 
-    public void sendMessage(String message) {
-        members.forEach(member -> member.sendMessage(message));
-    }
+	public void removeCapturedBanner(Team team) {
+		capturedBanners.remove(team);
+	}
 
-    public void addWin() {
-        members.forEach(member -> BattleShips.getGame().getStats(member.getUniqueId()).addGamesWon());
-    }
-    public static Team[] getActiveTeams() {
-        int teamCount = BattleShips.getSettingsConfig().getTeamCount();
-        Team[] activeTeams = new Team[teamCount];
-        System.arraycopy(values(), 0, activeTeams, 0, teamCount);
-        return activeTeams;
-    }
+	public ChestMenu getCapturedBannersChest() {
+		ChestMenu gui = ChestMenu.builder(1).title("Eroberte Banner von " + this).build();
+		GameSession game = BattleShips.getGame();
+		AtomicInteger slot = new AtomicInteger();
+		capturedBanners.forEach(bannerTeam -> {
+			Slot guiSlot = gui.getSlot(slot.getAndIncrement());
+			guiSlot.setItem(new ItemBuilder(bannerTeam.getBanner().getItem()).setDisplayName("§fBanner von Team " + bannerTeam).build());
+			guiSlot.setClickHandler((player, clickInformation) -> {
+				if (!bannerTeam.equals(this) //player cant capture banner of team's chest
+						&& !game.getTeam(player).equals(this)  //player cant capture banners of own chest
+						&& game.captureBanner(player, bannerTeam)) { //cant capture banner for other reason
+					this.removeCapturedBanner(bannerTeam);
+					gui.close();
+				}
+			});
+		});
 
-    public String getSideBoardText(int playingTeams) {
-        return (capturedBanners.contains(this) ? "§a✓" : "§4✗") + " " + this + " §7(" + capturedBanners.size() + "/" + playingTeams + ")";
-    }
+		return gui;
+	}
 
-    public String[] getTNTGunText() {
-        return new String[] {"", "§bTNT-Gun §7(Level: " + tntGunLevel + ")",
-                ((tntGunLevel == 0) ? "§cnicht bereit" : (tntGunCooldown == 0) ? "§abereit" : "§c" + tntGunCooldown)};
-    }
-    @Override
-    public String toString() {
-        return color + name + "§r";
-    }
+	public int getCapturedBanners() {
+		return capturedBanners.size();
+	}
+
+	public void sendMessage(String message) {
+		members.forEach(member -> member.sendMessage(message));
+	}
+
+	public void addWin() {
+		members.forEach(member -> BattleShips.getGame().getStats(member.getUniqueId()).addGamesWon());
+	}
+
+	public String getSideBoardText(int playingTeams) {
+		return (capturedBanners.contains(this) ? "§a✓" : "§4✗") + " " + this + " §7(" + capturedBanners.size() + "/" + playingTeams + ")";
+	}
+
+	public String[] getTNTGunText() {
+		return new String[]{"", "§bTNT-Gun §7(Level: " + tntGunLevel + ")",
+				((tntGunLevel == 0) ? "§cnicht bereit" : (tntGunCooldown == 0) ? "§abereit" : "§c" + tntGunCooldown)};
+	}
+
+	@Override
+	public String toString() {
+		return color + name + "§r";
+	}
+
 
 }

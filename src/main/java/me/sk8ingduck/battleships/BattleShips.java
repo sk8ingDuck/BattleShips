@@ -9,12 +9,15 @@ import me.sk8ingduck.battleships.config.MessagesConfig;
 import me.sk8ingduck.battleships.config.SettingsConfig;
 import me.sk8ingduck.battleships.config.TeamConfig;
 import me.sk8ingduck.battleships.game.GameSession;
+import me.sk8ingduck.battleships.game.TeamItem;
 import me.sk8ingduck.battleships.mysql.MySQL;
 import me.sk8ingduck.battleships.util.LeaderboardSign;
 import me.sk8ingduck.battleships.util.TranslateFile;
 import me.sk8ingduck.battleships.villagershop.GuiManager;
 import org.bukkit.Bukkit;
 import org.bukkit.GameRule;
+import org.bukkit.World;
+import org.bukkit.WorldCreator;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
@@ -64,6 +67,7 @@ public final class BattleShips extends JavaPlugin {
         }
         pluginManager.registerEvents(new MenuFunctionListener(), this);
         ConfigurationSerialization.registerClass(LeaderboardSign.class);
+        ConfigurationSerialization.registerClass(TeamItem.class);
 
         this.getCommand("setspawn").setExecutor(new SetspawnCommand());
         this.getCommand("stats").setExecutor(new StatsCommand());
@@ -79,13 +83,23 @@ public final class BattleShips extends JavaPlugin {
 
         GuiManager.init();
 
-        Bukkit.getWorlds().forEach(world -> world.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false));
+        Bukkit.getWorlds().forEach(world -> {
+            world.setAutoSave(false);
+            world.setGameRule(GameRule.ANNOUNCE_ADVANCEMENTS, false);
+            world.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false);
+        });
     }
 
     @Override
     public void onDisable() {
         if (game != null)
             game.saveStats();
+
+        Bukkit.getWorlds().forEach(world -> {
+            Bukkit.getServer().unloadWorld(world, false);
+            Bukkit.getServer().createWorld(new WorldCreator(world.getName())).setAutoSave(false);
+        });
+
     }
 
     public static BattleShips getInstance() {

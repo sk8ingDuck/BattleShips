@@ -1,7 +1,6 @@
 package me.sk8ingduck.battleships.listener;
 
 import me.sk8ingduck.battleships.BattleShips;
-import me.sk8ingduck.battleships.config.SettingsConfig;
 import me.sk8ingduck.battleships.event.GameStateChangeEvent;
 import me.sk8ingduck.battleships.game.GameSession;
 import me.sk8ingduck.battleships.game.GameState;
@@ -12,9 +11,6 @@ import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.inventory.ItemStack;
-
-import java.util.ArrayList;
 
 public class GameStateChangeListener implements Listener {
 
@@ -24,13 +20,15 @@ public class GameStateChangeListener implements Listener {
         if (event.getPreviousGameState() == GameState.LOBBY && event.getNewGameState() == GameState.WARMUP) {
             game.assignTeamToPlayers();
 
-            for (Team team : Team.getActiveTeams()) {
+            for (Team team : BattleShips.getTeamConfig().getActiveTeams()) {
                 if (team.getSize() > 0) {
                     team.teleportPlayers();
-                    team.resetBanner();
+                    team.getBanner().setBlock();
+                    team.getChest().setBlock();
                     game.addPlayingTeam(team);
                 } else {
-                    team.removeBannerAndChest();
+                    team.getBanner().removeBlock();
+                    team.getChest().removeBlock();
                 }
             }
             if (game.getPlayingTeams().size() < 2) {

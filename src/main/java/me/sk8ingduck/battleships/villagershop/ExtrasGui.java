@@ -38,8 +38,8 @@ public class ExtrasGui extends Gui {
 
         speedPotion.setClickHandler((player, clickInformation) -> buy(player, new ItemBuilder(Material.POTION).setPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20*60, 0)).setPotionColor(Color.AQUA).setDisplayName("Speed I").build(), 5));
         cobweb.setClickHandler((player, clickInformation) -> buy(player, new ItemBuilder(Material.COBWEB, 2).build(), 10));
-        granade.setClickHandler((player, clickInformation) -> buy(player, new ItemBuilder(Material.IRON_SWORD).build(), 20));
-        trap.setClickHandler((player, clickInformation) -> buy(player, new ItemBuilder(Material.DIAMOND_SWORD).build(), 30));
+        granade.setClickHandler((player, clickInformation) -> buy(player, new ItemBuilder(Material.SNOWBALL).setDisplayName("§cGranate").build(), 20));
+        trap.setClickHandler((player, clickInformation) -> buy(player, new ItemBuilder(Material.STRING).build(), 30));
     }
 
 

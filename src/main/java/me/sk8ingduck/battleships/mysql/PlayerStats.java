@@ -6,7 +6,7 @@ import java.util.UUID;
 public class PlayerStats {
 
 	private final int rank;
-	private UUID uuid;
+	private final UUID uuid;
 	private int kills;
 	private int deaths;
 	private int gamesPlayed;
